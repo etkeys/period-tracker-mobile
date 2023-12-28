@@ -25,6 +25,20 @@
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" /> -->
+
+                <Label
+                    Text="Days until next period"
+                    Style="{StaticResource Headline}"
+                    SemanticProperties.HeadingLevel="Level1"/>
+
+                <Label
+                    Text="99 days *"
+                    Style="{StaticResource SubHeadline}"
+                    SemanticProperties.HeadingLevel="Level2"/>
+
+                <Button
+                    Text="Record start of period"
+                    HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 
