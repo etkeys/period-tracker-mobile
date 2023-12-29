@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PeriodTracker.ViewModels;
 
 namespace PeriodTracker;
 
@@ -18,6 +19,9 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+        builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<MainViewModel>();
 
 		return builder.Build();
 	}

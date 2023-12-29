@@ -1,10 +1,13 @@
-﻿namespace PeriodTracker;
+﻿using PeriodTracker.ViewModels;
+
+namespace PeriodTracker;
 
 public partial class MainPage : ContentPage
 {
-	public MainPage()
+	public MainPage(MainViewModel vm)
 	{
 		InitializeComponent();
+        BindingContext = vm;
 	}
 
 }
