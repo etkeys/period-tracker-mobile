@@ -10,6 +10,10 @@ public partial class HistoryPage : ContentPage
         BindingContext = vm;
 	}
 
+    protected override async void OnNavigatedTo(NavigatedToEventArgs e){
+        await ((HistoryViewModel)BindingContext).LoadAsync();
+    }
+
     private async void OnRecordNewClicked(object sender, EventArgs e){
         ;
     }

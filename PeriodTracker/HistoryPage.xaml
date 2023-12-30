@@ -10,6 +10,7 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
+            <mauitoolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <mauitoolkit:IsListNotNullOrEmptyConverter x:Key="IsListNotNullOrEmptyConverter" />
             <mauitoolkit:IsListNullOrEmptyConverter x:Key="IsListNullOrEmptyConverter" />
         </ResourceDictionary>
@@ -24,17 +25,23 @@
             SemanticProperties.HeadingLevel="Level1"
             />
 
+        <Button
+            Text="Record start of period"
+            Clicked="OnRecordNewClicked"
+            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+            HorizontalOptions="Fill" />
+
+        <ActivityIndicator
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            Color="{StaticResource Primary}" />
+
         <Label
             Text="Seems like no cycles have been recorded."
             IsVisible="{Binding Cycles, Converter={StaticResource IsListNullOrEmptyConverter}}"
             FontAttributes="Italic"
             HorizontalOptions="Center"
             />
-
-        <Button
-            Text="Record start of period"
-            Clicked="OnRecordNewClicked"
-            HorizontalOptions="Fill" />
 
         <ListView
             IsVisible="{Binding Cycles, Converter={StaticResource IsListNotNullOrEmptyConverter}}"
