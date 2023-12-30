@@ -10,5 +10,9 @@ public partial class MainPage : ContentPage
         BindingContext = vm;
 	}
 
+    private async void OnRecordNewClicked(object sender, EventArgs e){
+        await Navigation.PushModalAsync(new CycleEditPage(new CycleEditViewModel()));
+    }
+
 }
 

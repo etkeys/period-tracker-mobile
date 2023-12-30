@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mauitoolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="PeriodTracker.CycleEditPage"
+             xmlns:viewmodel="clr-namespace:PeriodTracker.ViewModels"
+             x:DataType="viewmodel:CycleEditViewModel"
+             >
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <mauitoolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25">
+        <Label 
+            Text="{Binding PageTitleText}"
+            Style="{StaticResource Headline}"
+            SemanticProperties.HeadingLevel="Level1"/>
+
+        <HorizontalStackLayout
+            Spacing="20"
+            HorizontalOptions="Center" >
+            <Label
+                Text="Start date:"
+                VerticalTextAlignment="Center"
+                />
+
+            <DatePicker
+                Date="{Binding SelectedStartDate}"
+                MaximumDate="{Binding MaxStartDate}"
+                MinimumDate="{Binding MinStartDate}" />
+        </HorizontalStackLayout>
+
+        <Button
+            Text="{Binding SaveButtonText}"
+            Clicked="OnSaveClicked"
+            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+            HorizontalOptions="Fill"/>
+
+        <Button
+            Text="Cancel"
+            Clicked="OnCancelClicked"
+            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+            HorizontalOptions="Fill"/>
+
+        <ActivityIndicator
+            IsRunning="{Binding IsBusy}"
+            Color="{StaticResource Primary}" />
+
+    </VerticalStackLayout>
+</ContentPage>
