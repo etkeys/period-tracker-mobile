@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mauitoolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="PeriodTracker.HistoryPage"
+             xmlns:viewmodel="clr-namespace:PeriodTracker.ViewModels"
+             xmlns:local="clr-namespace:PeriodTracker"
+             x:DataType="viewmodel:HistoryViewModel"
              Title="History">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <mauitoolkit:IsListNotNullOrEmptyConverter x:Key="IsListNotNullOrEmptyConverter" />
+            <mauitoolkit:IsListNullOrEmptyConverter x:Key="IsListNullOrEmptyConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <VerticalStackLayout
         Padding="30,0"
@@ -15,6 +26,7 @@
 
         <Label
             Text="Seems like no cycles have been recorded."
+            IsVisible="{Binding Cycles, Converter={StaticResource IsListNullOrEmptyConverter}}"
             FontAttributes="Italic"
             HorizontalOptions="Center"
             />
@@ -23,5 +35,36 @@
             Text="Record start of period"
             Clicked="OnRecordNewClicked"
             HorizontalOptions="Fill" />
+
+        <ListView
+            IsVisible="{Binding Cycles, Converter={StaticResource IsListNotNullOrEmptyConverter}}"
+            ItemsSource="{Binding Cycles}"
+        >
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:Cycle">
+                    <ViewCell>
+                        <VerticalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="Start date: "
+                                    />
+                                <Label
+                                    Text="{Binding StartDateText}"
+                                    />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="Recorded: "
+                                    />
+                                <Label
+                                    Text="{Binding RecordedDateText}"
+                                    />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
     </VerticalStackLayout>
 </ContentPage>
