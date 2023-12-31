@@ -10,6 +10,10 @@ public partial class MainPage : ContentPage
         BindingContext = vm;
 	}
 
+    protected override async void OnNavigatedTo(NavigatedToEventArgs e){
+        await ((MainViewModel)BindingContext).LoadAsync();
+    }
+
     private async void OnRecordNewClicked(object sender, EventArgs e){
         await Navigation.PushModalAsync(new CycleEditPage(new CycleEditViewModel()));
     }

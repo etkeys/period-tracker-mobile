@@ -19,10 +19,10 @@ public class Repository : IDisposable
             RecordedDate = DateTime.Parse("11/27/2023"),
             StartDate = DateTime.Parse("11/27/2023")
             },
-        new(){
-            RecordedDate = DateTime.Parse("12/31/2023"),
-            StartDate = DateTime.Parse("12/31/2023")
-            },
+        // new(){
+        //     RecordedDate = DateTime.Parse("12/27/2023"),
+        //     StartDate = DateTime.Parse("12/27/2023")
+        //     },
     };
 
     private bool disposed;
@@ -49,5 +49,8 @@ public class Repository : IDisposable
 
     public Task<IEnumerable<Cycle>> GetCycles() =>
         Task.Run(() => (IEnumerable<Cycle>) cycles);
+
+    public Task<Cycle?> GetMostRecentCycle() =>
+        Task.Run(() => cycles.OrderByDescending(c => c.StartDate).FirstOrDefault());
 
 }
