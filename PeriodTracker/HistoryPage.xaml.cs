@@ -15,6 +15,6 @@ public partial class HistoryPage : ContentPage
     }
 
     private async void OnRecordNewClicked(object sender, EventArgs e){
-        ;
+        await Navigation.PushModalAsync(new CycleEditPage(new CycleEditViewModel()));
     }
 }
