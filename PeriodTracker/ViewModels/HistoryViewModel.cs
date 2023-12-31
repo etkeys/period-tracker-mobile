@@ -2,12 +2,22 @@
 
 namespace PeriodTracker.ViewModels;
 
-public class HistoryViewModel : ViewModelBase
+public class HistoryViewModel : ViewModelBase, IEventBusListener
 {
 
     private bool dataRefreshRequired = true;
 
+    public HistoryViewModel(){
+        EventBus.RegisterListener(this);
+    }
+
     public ObservableCollection<Cycle> Cycles {get; private set;} = new();
+
+    public void HandleEvent(EventBusBroadcastedEvent @event){
+        if (@event != EventBusBroadcastedEvent.CyclesUpdated) return;
+
+        dataRefreshRequired = true;
+    }
 
     public async Task LoadAsync(){
         if (!dataRefreshRequired) return;

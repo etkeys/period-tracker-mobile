@@ -50,7 +50,7 @@ public partial class CycleEditViewModel : ViewModelBase
             };
 
             using var db = Repository.GetContext();
-            if (!(await IsNewEntryValid(db, newEntry))){
+            if (!await IsNewEntryValid(db, newEntry)){
                 ServiceHelper.GetService<IPopupService>()
                     !.ShowPopup<UnableToSaveCyclePopupViewModel>(
                         onPresenting: viewModel =>
@@ -61,6 +61,7 @@ public partial class CycleEditViewModel : ViewModelBase
             }
 
             await db.AddCycle(newEntry);
+            await EventBus.BroadcastEvent(EventBusBroadcastedEvent.CyclesUpdated);
             return true;
         }
         finally{

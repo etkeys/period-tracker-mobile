@@ -1,13 +1,16 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace PeriodTracker.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IEventBusListener
 {
     private const int defaultCycleLengthDays = 28;
     private bool dataRefreshRequired = true;
+
+    public MainViewModel(){
+        EventBus.RegisterListener(this);
+    }
 
     [ObservableProperty]
     private string daysUntilNextCycleText = "??";
@@ -18,12 +21,19 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private string nextCycleStartDateText = string.Empty;
 
+    public void HandleEvent(EventBusBroadcastedEvent @event){
+        if (@event != EventBusBroadcastedEvent.CyclesUpdated) return;
+
+        dataRefreshRequired = true;
+    }
+
     public async Task LoadAsync(){
         if (!dataRefreshRequired) return;
 
         var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
         try{
             IsBusy = true;
+            IsCycleStartOverdue = false;
 
             using var db = Repository.GetContext();
             var mostRecentCycleStart = (await db.GetMostRecentCycle())?.StartDate;
