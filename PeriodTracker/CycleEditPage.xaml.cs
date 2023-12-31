@@ -15,7 +15,7 @@ public partial class CycleEditPage : ContentPage
     }
 
     private async void OnSaveClicked(object sender, EventArgs e){
-        await ((CycleEditViewModel)BindingContext).Save();
-        await Navigation.PopModalAsync();
+        if (await ((CycleEditViewModel)BindingContext).Save())
+            await Navigation.PopModalAsync();
     }
 }

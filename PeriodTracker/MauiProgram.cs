@@ -27,6 +27,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<HistoryPage>();
         builder.Services.AddSingleton<HistoryViewModel>();
 
-		return builder.Build();
+        builder.Services.AddTransientPopup<UnableToSaveCyclePopup, UnableToSaveCyclePopupViewModel>();
+
+        var app = builder.Build();
+
+        ServiceHelper.Initialize(app.Services);
+
+		return app;
 	}
 }

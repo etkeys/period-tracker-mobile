@@ -1,4 +1,5 @@
 
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PeriodTracker.ViewModels;
@@ -35,7 +36,7 @@ public partial class CycleEditViewModel : ViewModelBase
         // TODO Should check for nearby dates, like one within a week?
     }
 
-    public async Task Save() {
+    public async Task<bool> Save() {
         var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
 
         try{
@@ -49,12 +50,18 @@ public partial class CycleEditViewModel : ViewModelBase
             };
 
             using var db = Repository.GetContext();
-            if (await IsNewEntryValid(db, newEntry))
-                await db.AddCycle(newEntry);
-            else{
-                ;
-                // TODO what to do if the entry is not valid?
+            if (!(await IsNewEntryValid(db, newEntry))){
+                ServiceHelper.GetService<IPopupService>()
+                    !.ShowPopup<UnableToSaveCyclePopupViewModel>(
+                        onPresenting: viewModel =>
+                            viewModel.ReasonText = "An entry with the same start date already exists."
+                    );
+
+                return false;
             }
+
+            await db.AddCycle(newEntry);
+            return true;
         }
         finally{
             // Let the user think work is being done
