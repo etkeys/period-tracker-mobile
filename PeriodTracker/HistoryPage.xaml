@@ -40,24 +40,18 @@
                 IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
                 HorizontalOptions="Fill" />
 
-
-            <Label
-                Text="Seems like no cycles have been recorded."
-                IsVisible="{Binding Cycles, Converter={StaticResource IsListNullOrEmptyConverter}}"
-                FontAttributes="Italic"
-                HorizontalOptions="Center"
-                />
-
-            <ListView
+            <CollectionView
                 x:Name="cycleList"
-                IsVisible="{Binding Cycles, Converter={StaticResource IsListNotNullOrEmptyConverter}}"
                 ItemsSource="{Binding Cycles}"
-                RowHeight="60"
+                EmptyView="No cycles have been recorded"
             >
-                <ListView.ItemTemplate>
+                <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="local:Cycle">
-                        <ViewCell>
+                        <Border
+                            Margin="5"
+                        >
                             <Grid
+                                Margin="5"
                                 VerticalOptions="Center"
                                 >
                                 <Grid.RowDefinitions>
@@ -101,10 +95,10 @@
                                 />
 
                             </Grid>
-                        </ViewCell>
+                        </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
         </VerticalStackLayout>
 
