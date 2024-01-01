@@ -51,11 +51,10 @@ public partial class CycleEditViewModel : ViewModelBase
 
             using var db = Repository.GetContext();
             if (!await IsNewEntryValid(db, newEntry)){
-                ServiceHelper.GetService<IPopupService>()
-                    !.ShowPopup<UnableToSaveCyclePopupViewModel>(
-                        onPresenting: viewModel =>
-                            viewModel.ReasonText = "An entry with the same start date already exists."
-                    );
+                await ServiceHelper.GetService<IAlertService>()
+                    !.ShowAlertAsync(
+                        "Save failed",
+                        $"An entry with the same start date already exists.");
 
                 return false;
             }
