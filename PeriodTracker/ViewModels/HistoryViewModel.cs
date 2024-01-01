@@ -21,6 +21,13 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
     private async Task DeleteCycle(Cycle? cycle){
         if (cycle is null) return;
 
+        var confirmDelete = await ServiceHelper.GetService<IAlertService>()
+            !.ShowConfirmationAsync(
+                "Confirm delete",
+                $"Are you sure you want to delete cycle with start date \"{cycle.StartDateText}\"?");
+
+        if (!confirmDelete) return;
+
         var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
         try{
             IsBusy = true;
