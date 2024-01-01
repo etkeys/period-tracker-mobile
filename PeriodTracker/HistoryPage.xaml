@@ -88,15 +88,18 @@
                                         Text="{Binding RecordedDateText}"
                                         />
                                 </HorizontalStackLayout>
-                                <Button
+                                <ImageButton
                                     Grid.RowSpan="2"
                                     Grid.Row="0"
                                     Grid.Column="1"
-                                    Text="Delete"
                                     Command="{Binding Path=BindingContext.DeleteCycleCommand, Source={x:Reference cycleList}}"
                                     CommandParameter="{Binding}"
+                                    Source="trash_can.png"
+                                    HeightRequest="32"
+                                    WidthRequest="32"
                                     Margin="5"
-                                    />
+                                />
+
                             </Grid>
                         </ViewCell>
                     </DataTemplate>
