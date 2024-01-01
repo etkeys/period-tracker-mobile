@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace PeriodTracker.ViewModels;
 
@@ -9,9 +10,36 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
 
     public HistoryViewModel(){
         EventBus.RegisterListener(this);
+
+        DeleteCycleCommand = new AsyncRelayCommand<Cycle>(DeleteCycle);
     }
 
     public ObservableCollection<Cycle> Cycles {get; private set;} = new();
+
+    public IAsyncRelayCommand<Cycle> DeleteCycleCommand {get;}
+
+    private async Task DeleteCycle(Cycle? cycle){
+        if (cycle is null) return;
+
+        var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
+        try{
+            IsBusy = true;
+
+            using var db = Repository.GetContext();
+            var deleted = await db.DeleteCycle(cycle);
+
+            await delayTask;
+
+            if (deleted)
+                Cycles.RemoveAt(Cycles.IndexOf(cycle));
+
+            await EventBus.BroadcastEvent(EventBusBroadcastedEvent.CyclesUpdated);
+        }
+        finally{
+            IsBusy = false;
+            dataRefreshRequired = false;
+        }
+    }
 
     public void HandleEvent(EventBusBroadcastedEvent @event){
         if (@event != EventBusBroadcastedEvent.CyclesUpdated) return;

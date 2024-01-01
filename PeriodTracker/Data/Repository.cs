@@ -19,10 +19,10 @@ public class Repository : IDisposable
             RecordedDate = DateTime.Parse("11/27/2023"),
             StartDate = DateTime.Parse("11/27/2023")
             },
-        // new(){
-        //     RecordedDate = DateTime.Parse("12/27/2023"),
-        //     StartDate = DateTime.Parse("12/27/2023")
-        //     },
+        new(){
+            RecordedDate = DateTime.Parse("12/27/2023"),
+            StartDate = DateTime.Parse("12/27/2023")
+            },
     };
 
     private bool disposed;
@@ -36,6 +36,7 @@ public class Repository : IDisposable
             cycles.Add(newCycle);
         });
     }
+
     public void CheckDisposed() =>
         ObjectDisposedException.ThrowIf(disposed, this);
 
@@ -43,6 +44,15 @@ public class Repository : IDisposable
         if (disposed) return;
 
         disposed = true;
+    }
+
+    public Task<bool> DeleteCycle(Cycle cycle) {
+        CheckDisposed();
+
+        return Task.Run(() => {
+            if (!cycles.Contains(cycle)) return true;
+            return cycles.Remove(cycle);
+        });
     }
 
     public static Repository GetContext() => new();

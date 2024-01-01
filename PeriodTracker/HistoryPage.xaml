@@ -44,14 +44,28 @@
             />
 
         <ListView
+            x:Name="cycleList"
             IsVisible="{Binding Cycles, Converter={StaticResource IsListNotNullOrEmptyConverter}}"
             ItemsSource="{Binding Cycles}"
+            RowHeight="60"
         >
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:Cycle">
                     <ViewCell>
-                        <VerticalStackLayout>
-                            <HorizontalStackLayout>
+                        <Grid
+                            VerticalOptions="Center"
+                            >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <HorizontalStackLayout
+                                Grid.Row="0"
+                                Grid.Column="0">
                                 <Label
                                     Text="Start date: "
                                     />
@@ -59,7 +73,9 @@
                                     Text="{Binding StartDateText}"
                                     />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
+                            <HorizontalStackLayout
+                                Grid.Row="1"
+                                Grid.Column="0">
                                 <Label
                                     Text="Recorded: "
                                     />
@@ -67,7 +83,18 @@
                                     Text="{Binding RecordedDateText}"
                                     />
                             </HorizontalStackLayout>
-                        </VerticalStackLayout>
+                            <Button
+                                Grid.RowSpan="2"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Text="Delete"
+                                Command="{Binding Path=BindingContext.DeleteCycleCommand, Source={x:Reference cycleList}}"
+                                CommandParameter="{Binding}"
+                                Margin="5"
+                                />
+
+
+                        </Grid>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
