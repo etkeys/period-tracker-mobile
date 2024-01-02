@@ -35,6 +35,8 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
             IsCycleStartOverdue = false;
 
+            await Repository.Initialize();
+
             using var db = Repository.GetContext();
             var mostRecentCycleStart = (await db.GetMostRecentCycle())?.StartDate;
             await delayTask;
