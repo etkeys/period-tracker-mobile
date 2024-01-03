@@ -25,22 +25,10 @@ public partial class CycleEditViewModel : ViewModelBase
     [ObservableProperty]
     private DateTime selectedStartDate = DateTime.Today;
 
-    private async Task<bool> IsNewEntryValid(Repository db, Cycle newEntry){
-        var cycles =
-            (from c in await db.GetCycles()
-            select c.StartDate)
-            .ToHashSet();
-
-        return !cycles.Contains(newEntry.StartDate);
-
-        // TODO Should check for nearby dates, like one within a week?
-    }
-
     public async Task<bool> Save() {
         var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
 
         try{
-            // Do saving here
             IsBusy = true;
             SaveButtonText = saveButtonTextSaving;
 
@@ -50,7 +38,7 @@ public partial class CycleEditViewModel : ViewModelBase
             };
 
             using var db = Repository.GetContext();
-            if (!await IsNewEntryValid(db, newEntry)){
+            if (!await db.AddCycle(newEntry)){
                 await ServiceHelper.GetService<IAlertService>()
                     !.ShowAlertAsync(
                         "Save failed",
@@ -59,12 +47,10 @@ public partial class CycleEditViewModel : ViewModelBase
                 return false;
             }
 
-            await db.AddCycle(newEntry);
             await EventBus.BroadcastEvent(EventBusBroadcastedEvent.CyclesUpdated);
             return true;
         }
         finally{
-            // Let the user think work is being done
             await delayTask;
             SaveButtonText = saveButtonTextSave;
             IsBusy = false;

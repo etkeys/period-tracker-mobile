@@ -20,31 +20,32 @@ public partial class Repository : IDisposable
     private static string DatabasePath =>
         Path.Combine(FileSystem.AppDataDirectory, "app.db");
 
-    public Task AddCycle(Cycle newCycle){
+    public Task<bool> AddCycle(Cycle newCycle){
         CheckDisposed();
 
-        return Task.Run(async () => {
-            var alreadyExists =
-                (from c in await GetCycles()
-                where c.Equals(newCycle)
-                select true)
-                .Any();
-
-            if (alreadyExists) return;
-
+        return Task.Run(() => {
             using var trans = connection.BeginTransaction();
-            using var command = connection.CreateCommand();
-            command.Transaction = trans;
-
             try{
+                var alreadyExists =
+                    (from c in GetCycles(trans)
+                    where c.Equals(newCycle)
+                    select true)
+                    .Any();
+
+                if (alreadyExists) return false;
+
+                using var command = connection.CreateCommand();
+                command.Transaction = trans;
+
                 command.CommandText = "INSERT INTO Cycles VALUES($startDate, $recordDate)";
 
                 command.Parameters.AddWithValue("$startDate", newCycle.StartDate);
                 command.Parameters.AddWithValue("$recordDate", newCycle.RecordedDate);
 
-                command.ExecuteNonQuery();
+                var rowsAffected = command.ExecuteNonQuery();
 
                 trans.Commit();
+                return rowsAffected > 0;
             }
             catch(Exception){
                 trans.Rollback();
@@ -59,6 +60,10 @@ public partial class Repository : IDisposable
 
     public void Dispose(){
         if (disposed) return;
+
+        if (connection.State != System.Data.ConnectionState.Closed)
+            connection.Close();
+        connection.Dispose();
 
         disposed = true;
     }
@@ -93,7 +98,22 @@ public partial class Repository : IDisposable
         CheckDisposed();
 
         return Task.Run(() => {
+            using var trans = connection.BeginTransaction();
+            try{
+                var ret = GetCycles(trans);
+                trans.Commit();
+                return ret; 
+            }
+            catch(Exception) {
+                trans.Rollback();
+                throw;
+            }
+        });
+    }
+
+    private IEnumerable<Cycle> GetCycles(SqliteTransaction transaction){
             using var command = connection.CreateCommand();
+            command.Transaction = transaction;
             command.CommandText = "SELECT StartDate, RecordedDate FROM Cycles";
 
             var result = new LinkedList<Cycle>();
@@ -106,11 +126,8 @@ public partial class Repository : IDisposable
                 });
             }
 
-            return (IEnumerable<Cycle>) result;
-        });
+            return result;
     }
-    // =>
-    //     Task.Run(() => (IEnumerable<Cycle>) cycles);
 
     public async Task<Cycle?> GetMostRecentCycle(){
         CheckDisposed();
