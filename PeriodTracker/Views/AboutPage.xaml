@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PeriodTracker.ViewModels"
+             x:Class="PeriodTracker.AboutPage"
+             x:DataType="viewmodel:AboutViewModel"
+             Title="About">
+
+    <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25"
+        >
+
+        <Label Text="_app icon_"/>
+
+        <VerticalStackLayout>
+            <Label Text="PeriodTracker version"/>
+            <Label Text="{Binding DisplayVersionText}"/>
+        </VerticalStackLayout>
+
+        <Label
+            Text="Report a bug"
+            >
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding WebBrowserNavigateCommand}"
+                    CommandParameter="https://github.com/etkeys/period-tracker-mobile/issues"
+                    />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <Label
+            Text="View source code"
+            >
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding WebBrowserNavigateCommand}"
+                    CommandParameter="https://github.com/etkeys/period-tracker-mobile"
+                    />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <Label
+            Text="View attributions"
+            />
+
+    </VerticalStackLayout>
+</ContentPage>

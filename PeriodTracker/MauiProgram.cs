@@ -23,6 +23,8 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddSingleton<IAlertService, AlertService>();
+        builder.Services.AddSingleton<AboutPage>();
+        builder.Services.AddSingleton<AboutViewModel>();
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<HistoryPage>();
