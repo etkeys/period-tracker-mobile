@@ -25,7 +25,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<AboutPage>();
         builder.Services.AddSingleton<AboutViewModel>();
-        builder.Services.AddSingleton<IAppInfo>(_ => new ThisAssemblyInfo(AppInfo.Current));
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<HistoryPage>();
