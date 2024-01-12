@@ -1,0 +1,20 @@
+
+<Project>
+
+    <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+        <PropertyGroup>
+            <PythonExe>python3</PythonExe>
+            <ArgConfigFile>$([MSBuild]::GetPathOfFileAbove("version.json", "."))</ArgConfigFile>
+            <ArgProjectDir>$([MSBuild]::EnsureTrailingSlash('$(MSBuildThisFileDirectory)_versionInfo'))</ArgProjectDir>
+            <ScriptPath>$(MSBuildThisFileDirectory)../scripts/generate_version_info.py</ScriptPath>
+        </PropertyGroup>
+
+        <Message Text="Generating version info" Importance="High" />
+        <!-- <Message Text="    ScriptPath = $(ScriptPath)" Importance="High" />
+        <Message Text="    ArgConfigFile = $(ArgConfigFile)" Importance="High" />
+        <Message Text="    ArgProjectDir = $(ArgProjectDir)" Importance="High" /> -->
+
+        <Exec Command="$(PythonExe) &quot;$(ScriptPath)&quot; &quot;$(ArgConfigFile)&quot; &quot;$(ArgProjectDir)&quot;" />
+    </Target>
+
+</Project>
