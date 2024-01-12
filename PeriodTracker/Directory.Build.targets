@@ -17,4 +17,14 @@
         <Exec Command="$(PythonExe) &quot;$(ScriptPath)&quot; &quot;$(ArgConfigFile)&quot; &quot;$(ArgProjectDir)&quot;" />
     </Target>
 
+    <Target Name="EmbedGitCommitHash" AfterTargets="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+        <Message Text="Embedding git commit hash" Importance="High" />
+        <ItemGroup>
+            <EmbeddedResource
+                Include="_versionInfo\commit_hash.txt"
+                LogicalName="$(RootNamespace).commit_hash_txt"
+                />
+        </ItemGroup>
+    </Target>
+
 </Project>
