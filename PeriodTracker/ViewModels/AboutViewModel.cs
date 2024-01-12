@@ -8,7 +8,7 @@ public partial class AboutViewModel: ViewModelBase
 
     public AboutViewModel(IAppInfo appInfo){
         var commitHash = TryGetGitCommitHash();
-        var commitHashText = commitHash.Successful ? $" ({commitHash.Value})" : string.Empty;
+        var commitHashText = commitHash.Successful ? $" ({commitHash.Value.Trim()})" : string.Empty;
 
         DisplayVersionText = $"{appInfo.Version:3}#{appInfo.BuildString}{commitHashText}";
     }
