@@ -42,7 +42,11 @@
 
         <Label
             Text="View attributions"
-            />
+        >
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnViewAttributionsTapped" />
+            </Label.GestureRecognizers>
+        </Label>
 
     </VerticalStackLayout>
 </ContentPage>

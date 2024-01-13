@@ -9,4 +9,7 @@ public partial class AboutPage : ContentPage
 		InitializeComponent();
         BindingContext = vm;
 	}
+
+    private async void OnViewAttributionsTapped(object sender, EventArgs e) =>
+        await Navigation.PushAsync(new AttributionsPage());
 }

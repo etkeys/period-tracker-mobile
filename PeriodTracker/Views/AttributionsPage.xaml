@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PeriodTracker.AttributionsPage"
+             Title="Attributions">
+    <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25" >
+
+        <Label TextType="Html">
+            <![CDATA[
+            <p>Some icons used were from flaticon.com, published by the following:</p>
+            <ul style="Margin: 5px;">
+                <li>Trash icons by Freepik</li>
+                <li>Water icons by Good Ware</li>
+            </ul>
+            ]]>
+        </Label>
+
+    </VerticalStackLayout>
+</ContentPage>
