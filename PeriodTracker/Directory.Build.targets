@@ -6,8 +6,6 @@
             <Output TaskParameter="ConsoleOutput" ItemName="GitCommitHash"/>
         </Exec>
 
-        <Message Text="Git commit hash='@(GitCommitHash)'" Importance="High"/>
-
         <WriteLinesToFile File="commit_hash.txt" Lines="@(GitCommitHash)" Overwrite="true"/>
 
         <ItemGroup>
