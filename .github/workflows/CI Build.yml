@@ -33,5 +33,15 @@ jobs:
                   dotnet workload install android --ignore-failed-sources
                   dotnet workload install maui --ignore-failed-sources
 
+            - name: Create keystore
+              shell: bash
+              run: echo "${{ secrets.ANDROID_SIGNING_KEYSTORE }}" | base64 --decode > PeriodTracker.keystore
+
+            - name: Export signing key password
+              env:
+                  ANDROID_SIGNING_PASSWORD: ${{ secrets.ANDROID_SIGNING_PASSWORD }}
+              shell: bash
+              run: echo "Hello from exporting singing key password!"
+
             - name: Build MAUI Android
               run: dotnet build -f net8.0-android -c Release PeriodTracker.sln
