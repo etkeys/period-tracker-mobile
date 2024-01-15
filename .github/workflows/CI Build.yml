@@ -1,0 +1,37 @@
+name: CI Build
+
+on: [push, workflow_dispatch]
+
+permissions:
+    contents: read
+
+env:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+    build-android:
+        name: Android Build
+        runs-on: windows-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v1
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+
+            - name: Setup Java
+              uses: actions/setup-java@v2
+              with:
+                  distribution: 'microsoft'
+                  java-version: '11'
+
+            - name: Install MAUI Workloads
+              run: |
+                  dotnet workload install android --ignore-failed-sources
+                  dotnet workload install maui --ignore-failed-sources
+
+            - name: Build MAUI Android
+              run: dotnet build -f net8.0-android -c Release PeriodTracker.sln
