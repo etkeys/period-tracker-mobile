@@ -49,4 +49,4 @@ jobs:
             - name: Publish MAUI Android
               env:
                   IS_BUILD_CI_PUBLISH: true
-              run: dotnet publish -f net8.0-android PeriodTracker.sln -p:AndriodSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
+              run: dotnet publish -f net8.0-android PeriodTracker.sln -p:AndroidSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
