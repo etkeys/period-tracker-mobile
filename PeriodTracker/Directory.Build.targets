@@ -11,6 +11,8 @@
         </PropertyGroup>
 
         <Copy SourceFiles="$(OriginalFile)" DestinationFiles="$(CopiedFile)" />
+
+        <Message Text="Published assets -> $(CopiedFile)" Importance="High" />
     </Target>
 
     <Target Name="CreateEasyPublishDir">

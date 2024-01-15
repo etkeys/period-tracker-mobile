@@ -1,0 +1,51 @@
+name: CI Publish
+
+on:
+    push:
+        tags: ['v*']
+
+# permissions:
+#     contents: read
+
+env:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+    build-android:
+        name: Android Build
+        runs-on: windows-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v1
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+
+            - name: Setup Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'microsoft'
+                  java-version: '11'
+
+            - name: Install MAUI Workloads
+              run: |
+                  dotnet workload install android --ignore-failed-sources
+                  dotnet workload install maui --ignore-failed-sources
+
+            - name: Create keystore
+              shell: bash
+              run: echo "${{ secrets.ANDROID_SIGNING_KEYSTORE }}" | base64 --decode > PeriodTracker.keystore
+
+            - name: Publish MAUI Android
+              env:
+                  IS_BUILD_CI_PUBLISH: true
+              run: dotnet publish -f net8.0-android PeriodTracker.sln -p:AndroidSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
+
+            - name: Create release
+              uses: softprops/action-gh-release@v1
+              with:
+                  draft: true
+                  files: publish/*.apk

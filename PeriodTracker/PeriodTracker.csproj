@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <SolutionDir Condition="'$(SolutionDir)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), PeriodTracker.sln))</SolutionDir>
+        <IsBuildCiPublish Condition="'$(IsBuildCiPublish)' == ''">$(IS_BUILD_CI_PUBLISH)</IsBuildCiPublish>
     </PropertyGroup>
     <PropertyGroup>
         <AndroidSdkDirectory>\home\erik\Android\Sdk\</AndroidSdkDirectory>
@@ -50,7 +51,7 @@
         <EasyPublishDir>$([MSBuild]::EnsureTrailingSlash('$(SolutionDir)publish'))</EasyPublishDir>
     </PropertyGroup>
 
-    <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+    <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release' and '$(IsBuildCiPublish)' == 'true'">
         <AndroidKeyStore>true</AndroidKeyStore>
         <AndroidSigningKeyAlias>periodtracker</AndroidSigningKeyAlias>
         <AndroidSigningKeyStore>$(SolutionDir)PeriodTracker.keystore</AndroidSigningKeyStore>
