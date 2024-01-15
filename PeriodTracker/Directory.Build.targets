@@ -1,6 +1,22 @@
 
 <Project>
 
+    <Target Name="CopyPublishedAssetsAndroid"
+            AfterTargets="Publish"
+            DependsOnTargets="CreateEasyPublishDir"
+            Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+        <PropertyGroup>
+            <OriginalFile>$(ProjectDir)$(PublishDir)$(ApplicationId)-Signed.apk</OriginalFile>
+            <CopiedFile>$(EasyPublishDir)$(ApplicationTitle).$(Version).apk</CopiedFile>
+        </PropertyGroup>
+
+        <Copy SourceFiles="$(OriginalFile)" DestinationFiles="$(CopiedFile)" />
+    </Target>
+
+    <Target Name="CreateEasyPublishDir">
+        <MakeDir Directories="$(EasyPublishDir)" Condition="!Exists('$(EasyPublishDir)')"/>
+    </Target>
+
     <Target Name="EmbedGitCommitHash" BeforeTargets="BeforeBuild">
         <Exec ConsoleToMSBuild="true" Command="git rev-parse --short=10 HEAD">
             <Output TaskParameter="ConsoleOutput" ItemName="GitCommitHash"/>
