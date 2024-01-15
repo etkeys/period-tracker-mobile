@@ -1,11 +1,11 @@
 name: CI Publish
 
 on:
-    push:
-        tags: ['v*']
+    release:
+        types: [released]
 
-# permissions:
-#     contents: read
+permissions:
+    contents: write
 
 env:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -44,8 +44,19 @@ jobs:
                   IS_BUILD_CI_PUBLISH: true
               run: dotnet publish -f net8.0-android PeriodTracker.sln -p:AndroidSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
 
-            - name: Create release
-              uses: softprops/action-gh-release@v1
+            - name: Save asset name
+              id: save_asset_name
+              shell: bash
+              run: |
+                cd publish
+                echo "ASSET_NAME=$(ls -1 *.apk | head -n 1)" >> $GITHUB_OUTPUT
+
+            - name: Upload asset
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  draft: true
-                  files: publish/*.apk
+                  upload_url: ${{ github.event.release.upload_url }}
+                  asset_path: publish/${{ steps.save_asset_name.outputs.ASSET_NAME }}
+                  asset_name: ${{ steps.save_asset_name.outputs.ASSET_NAME }}
+                  asset_content_type: application/octet-stream
