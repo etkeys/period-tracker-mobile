@@ -77,9 +77,11 @@
                                     Grid.Column="0">
                                     <Label
                                         Text="Recorded: "
+                                        Style="{StaticResource Muted}"
                                         />
                                     <Label
                                         Text="{Binding RecordedDateText}"
+                                        Style="{StaticResource Muted}"
                                         />
                                 </HorizontalStackLayout>
                                 <ImageButton
