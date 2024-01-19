@@ -5,12 +5,12 @@ using Microsoft.Data.Sqlite;
 
 namespace PeriodTracker;
 
-public partial class Repository : IDisposable
+public partial class Repository
 {
 
-    private Task AddAppliedMigration(SqliteTransaction trans, string migrationId) =>
+    private Task AddAppliedMigration(SqliteTransaction trans, long migrationId) =>
         Task.Run(() => {
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "INSERT INTO Migrations VALUES ($id)";
             command.Parameters.AddWithValue("$id", migrationId);
 
@@ -18,47 +18,41 @@ public partial class Repository : IDisposable
             command.ExecuteNonQuery();
         });
 
-    private Task<HashSet<string>> GetAppliedMigrations() =>
+    private Task<long> GetLastAppliedMigrations() =>
         Task.Run(() =>
         {
-            var result = new HashSet<string>();
-
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 
             // First check if the migrations table actually exists
             command.CommandText =
                 "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Migrations'";
             var tableExists = command.ExecuteScalar() is not null;
-            if (!tableExists) return result;
+            if (!tableExists) return 0;
 
             // Get a list of the migrations we've already applied
-            command.CommandText = "SELECT Id FROM Migrations";
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-                result.Add((string)reader["Id"]);
+            command.CommandText = "SELECT MAX(Id) FROM Migrations";
+            var lastMigration = Convert.ToInt64(command.ExecuteScalar());
 
-            return result;
+            return lastMigration;
         });
 
 
     private async Task PerformMigrations(){
-        var appliedMigrations = await GetAppliedMigrations();
+        var lastAppliedMigration = await GetLastAppliedMigrations();
 
-        var possibleMigrations =
+        var migrationsToApply =
             from i in
                 from t in Assembly.GetExecutingAssembly().GetTypes()
                 where t.GetInterfaces().Contains(typeof(IDbMigration))
                 select Activator.CreateInstance(t) as IDbMigration
+            where i.Id > lastAppliedMigration
             orderby i.Id
             select i;
 
-        using var trans = connection.BeginTransaction();
+        using var trans = _connection.BeginTransaction();
         try{
-            foreach(var migration in possibleMigrations){
-                if (appliedMigrations.Contains(migration.Id))
-                    continue;
-
-                await migration.Apply(connection, trans);
+            foreach(var migration in migrationsToApply){
+                await migration.Apply(_connection, trans);
                 await AddAppliedMigration(trans, migration.Id);
             }
 

@@ -7,7 +7,7 @@ namespace PeriodTracker;
 public class Migration_2401011537 : IDbMigration
 {
 
-    public string Id => nameof(Migration_2401011537).Split('_').Last();
+    public long Id => Convert.ToInt64(nameof(Migration_2401011537).Split('_').Last());
 
     private readonly static string[] queries = 
         [

@@ -5,6 +5,6 @@ namespace PeriodTracker;
 
 public interface IDbMigration
 {
-    string Id {get;}
+    long Id {get;}
     Task Apply(DbConnection connection, DbTransaction transaction);
 }
