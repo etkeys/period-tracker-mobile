@@ -26,6 +26,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<AboutPage>();
         builder.Services.AddSingleton<AboutViewModel>();
         builder.Services.AddSingleton<IAppInfo>(_ => AppInfo.Current);
+        builder.Services.AddSingleton<IDbContextProvider>(_ => DbContextProviderFactory.Default);
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<HistoryPage>();

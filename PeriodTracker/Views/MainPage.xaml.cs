@@ -15,7 +15,8 @@ public partial class MainPage : ContentPage
     }
 
     private async void OnRecordNewClicked(object sender, EventArgs e){
-        await Navigation.PushModalAsync(new CycleEditPage(new CycleEditViewModel()));
+        await Navigation.PushModalAsync(
+            new CycleEditPage(new CycleEditViewModel(ServiceHelper.GetService<IDbContextProvider>()!)));
     }
 
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 using Microsoft.Data.Sqlite;
 
@@ -9,15 +9,17 @@ public partial class Repository : IDisposable
 
     private readonly SqliteConnection _connection;
     private bool _disposed;
-    private static bool hasBeenInitialized = false;
+    private readonly IDbInitializationInfo _initInfo;
 
+
+    private Repository(IDbInitializationInfo initInfo){
+        _initInfo = initInfo;
 
         _connection = new SqliteConnection($"Data Source={DatabasePath}");
         _connection.Open();
     }
 
-    private static string DatabasePath =>
-        Path.Combine(FileSystem.AppDataDirectory, "app.db");
+    public string DatabasePath => _initInfo.Database.FullName;
 
     public Task<bool> AddCycle(Cycle newCycle){
         CheckDisposed();
@@ -91,7 +93,18 @@ public partial class Repository : IDisposable
         });
     }
 
-    public static Repository GetContext() => new();
+    public static async Task<Repository> GetContext(IDbInitializationInfo initInfo) {
+        var db = new Repository(initInfo);
+        try{
+            await db.PerformMigrations();
+            return db;
+        }
+        catch (Exception ex)
+        {
+            db.Dispose();
+            throw new Exception("Unable to initialize database.", ex);
+        }
+    }
 
     public Task<IEnumerable<Cycle>> GetCycles(){
         CheckDisposed();
@@ -139,14 +152,5 @@ public partial class Repository : IDisposable
     }
     // =>
     //     Task.Run(() => cycles.OrderByDescending(c => c.StartDate).FirstOrDefault());
-
-    public static async Task Initialize() {
-        if (hasBeenInitialized) return;
-
-        using var db = GetContext();
-        await db.PerformMigrations();
-
-        hasBeenInitialized = true;
-    }
 
 }

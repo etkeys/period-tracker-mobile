@@ -5,11 +5,13 @@ namespace PeriodTracker.ViewModels;
 
 public class HistoryViewModel : ViewModelBase, IEventBusListener
 {
-
     private bool dataRefreshRequired = true;
+    private readonly IDbContextProvider _dbProvider;
 
-    public HistoryViewModel(){
+    public HistoryViewModel(IDbContextProvider dbProvider){
         EventBus.RegisterListener(this);
+
+        _dbProvider = dbProvider;
 
         DeleteCycleCommand = new AsyncRelayCommand<Cycle>(DeleteCycle);
     }
@@ -32,7 +34,7 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
         try{
             IsBusy = true;
 
-            using var db = Repository.GetContext();
+            using var db = await _dbProvider.GetContext();
             var deleted = await db.DeleteCycle(cycle);
 
             await delayTask;
@@ -61,7 +63,7 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
         try{
             IsBusy = true;
 
-            using var db = Repository.GetContext();
+            using var db = await _dbProvider.GetContext();
             var cycles =
                 from c in await db.GetCycles()
                 orderby c.StartDate descending
