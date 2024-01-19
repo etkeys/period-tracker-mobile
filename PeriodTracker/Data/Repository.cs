@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Immutable;
 using Microsoft.Data.Sqlite;
 
@@ -7,14 +7,13 @@ namespace PeriodTracker;
 public partial class Repository : IDisposable
 {
 
-    private readonly SqliteConnection connection;
-    private bool disposed;
+    private readonly SqliteConnection _connection;
+    private bool _disposed;
     private static bool hasBeenInitialized = false;
 
 
-    private Repository() {
-        connection = new SqliteConnection($"Data Source={DatabasePath}");
-        connection.Open();
+        _connection = new SqliteConnection($"Data Source={DatabasePath}");
+        _connection.Open();
     }
 
     private static string DatabasePath =>
@@ -24,7 +23,7 @@ public partial class Repository : IDisposable
         CheckDisposed();
 
         return Task.Run(() => {
-            using var trans = connection.BeginTransaction();
+            using var trans = _connection.BeginTransaction();
             try{
                 var alreadyExists =
                     (from c in GetCycles(trans)
@@ -34,7 +33,7 @@ public partial class Repository : IDisposable
 
                 if (alreadyExists) return false;
 
-                using var command = connection.CreateCommand();
+                using var command = _connection.CreateCommand();
                 command.Transaction = trans;
 
                 command.CommandText = "INSERT INTO Cycles VALUES($startDate, $recordDate)";
@@ -56,24 +55,24 @@ public partial class Repository : IDisposable
     }
 
     public void CheckDisposed() =>
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
     public void Dispose(){
-        if (disposed) return;
+        if (_disposed) return;
 
-        if (connection.State != System.Data.ConnectionState.Closed)
-            connection.Close();
-        connection.Dispose();
+        if (_connection.State != System.Data.ConnectionState.Closed)
+            _connection.Close();
+        _connection.Dispose();
 
-        disposed = true;
+        _disposed = true;
     }
 
     public Task<bool> DeleteCycle(Cycle cycle) {
         CheckDisposed();
 
         return Task.Run(() => {
-            using var trans = connection.BeginTransaction();
-            using var command = connection.CreateCommand();
+            using var trans = _connection.BeginTransaction();
+            using var command = _connection.CreateCommand();
             command.Transaction = trans;
 
             try{
@@ -98,7 +97,7 @@ public partial class Repository : IDisposable
         CheckDisposed();
 
         return Task.Run(() => {
-            using var trans = connection.BeginTransaction();
+            using var trans = _connection.BeginTransaction();
             try{
                 var ret = GetCycles(trans);
                 trans.Commit();
@@ -112,7 +111,7 @@ public partial class Repository : IDisposable
     }
 
     private IEnumerable<Cycle> GetCycles(SqliteTransaction transaction){
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.Transaction = transaction;
             command.CommandText = "SELECT StartDate, RecordedDate FROM Cycles";
 
