@@ -9,7 +9,11 @@ public partial class CycleEditViewModel : ViewModelBase
     private const string saveButtonTextSave = "Save";
     private const string saveButtonTextSaving = "Saving...";
 
-    public CycleEditViewModel(){
+    private readonly IDbContextProvider _dbProvider;
+
+    public CycleEditViewModel(IDbContextProvider dbProvider){
+        _dbProvider = dbProvider;
+
         PageTitleText = "New cycle";
         SaveButtonText = saveButtonTextSave;
     }
@@ -37,7 +41,7 @@ public partial class CycleEditViewModel : ViewModelBase
                 StartDate = SelectedStartDate,
             };
 
-            using var db = Repository.GetContext();
+            using var db = await _dbProvider.GetContext();
             if (!await db.AddCycle(newEntry)){
                 await ServiceHelper.GetService<IAlertService>()
                     !.ShowAlertAsync(

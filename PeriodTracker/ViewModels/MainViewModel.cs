@@ -7,9 +7,12 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
 {
     private const int defaultCycleLengthDays = 28;
     private bool dataRefreshRequired = true;
+    private readonly IDbContextProvider _dbProvider;
 
-    public MainViewModel(){
+    public MainViewModel(IDbContextProvider dbProvider){
         EventBus.RegisterListener(this);
+
+        _dbProvider = dbProvider;
     }
 
     [ObservableProperty]
@@ -35,9 +38,7 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
             IsCycleStartOverdue = false;
 
-            await Repository.Initialize();
-
-            using var db = Repository.GetContext();
+            using var db = await _dbProvider.GetContext();
             var mostRecentCycleStart = (await db.GetMostRecentCycle())?.StartDate;
             await delayTask;
 
