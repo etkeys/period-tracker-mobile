@@ -58,6 +58,10 @@ public class TemporaryDirectoryFixture: IDisposable
     public void Dispose(){
         if (_disposed) return;
 
+        // Add a sleep so that tests that are endings have a brief moment to
+        // finish releasing their resources.
+        Thread.Sleep(TimeSpan.FromSeconds(1));
+
         Cleanup(false);
 
         _disposed = true;
