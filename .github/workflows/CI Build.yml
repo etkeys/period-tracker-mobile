@@ -33,5 +33,8 @@ jobs:
                   dotnet workload install android --ignore-failed-sources
                   dotnet workload install maui --ignore-failed-sources
 
-            - name: Build MAUI Android
-              run: dotnet build -f net8.0-android -c Release PeriodTracker.sln
+            - name: Build app
+              run: dotnet build -c Release PeriodTracker.sln
+
+            - name: Run tests
+              run: dotnet test -c Release --no-build
