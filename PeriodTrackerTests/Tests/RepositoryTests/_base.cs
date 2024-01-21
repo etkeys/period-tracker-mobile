@@ -3,7 +3,7 @@ using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
-public partial class RepositoryTests : IAssemblyFixture<TemporaryDirectoryFixture>
+public partial class RepositoryTests : IClassFixture<TemporaryDirectoryFixture>
 {
     private readonly Mock<IDbInitializationInfo> _dbInitInfoMock = new(MockBehavior.Strict);
     private readonly TemporaryDirectoryFixture _tempDir;

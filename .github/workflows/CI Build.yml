@@ -37,4 +37,4 @@ jobs:
               run: dotnet build -c Release PeriodTracker.sln
 
             - name: Run tests
-              run: dotnet test -c Release --no-build
+              run: dotnet test -c Release --no-build -l:"console;verbosity=normal"
