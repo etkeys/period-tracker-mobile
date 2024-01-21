@@ -11,7 +11,6 @@ public partial class Repository : IDisposable
     private bool _disposed;
     private readonly IDbInitializationInfo _initInfo;
 
-
     private Repository(IDbInitializationInfo initInfo){
         _initInfo = initInfo;
 
@@ -53,7 +52,6 @@ public partial class Repository : IDisposable
                 throw;
             }
         });
-
     }
 
     public void CheckDisposed() =>
@@ -150,7 +148,5 @@ public partial class Repository : IDisposable
             select c)
             .FirstOrDefault();
     }
-    // =>
-    //     Task.Run(() => cycles.OrderByDescending(c => c.StartDate).FirstOrDefault());
 
 }
