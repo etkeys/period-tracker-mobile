@@ -10,6 +10,8 @@ permissions:
 env:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     DOTNET_CLI_TELEMETRY_OPTOUT: true
+    IS_BUILD_CI_PUBLISH: true
+    IS_CI_CD_BUILD: true
 
 jobs:
     build-android:
@@ -35,14 +37,18 @@ jobs:
                   dotnet workload install android --ignore-failed-sources
                   dotnet workload install maui --ignore-failed-sources
 
+            - name: Build app
+              run: dotnet build -c Release
+
+            - name: Run tests
+              run: dotnet test -c Release --no-build -l:"console;verbosity=normal"
+
             - name: Create keystore
               shell: bash
               run: echo "${{ secrets.ANDROID_SIGNING_KEYSTORE }}" | base64 --decode > PeriodTracker.keystore
 
             - name: Publish MAUI Android
-              env:
-                  IS_BUILD_CI_PUBLISH: true
-              run: dotnet publish -f net8.0-android PeriodTracker.sln -p:AndroidSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
+              run: dotnet publish -f net8.0-android --no-build PeriodTracker.sln -p:AndroidSigningStorePass="${{ secrets.ANDROID_SIGNING_PASSWORD }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_SIGNING_PASSWORD }}"
 
             - name: Save asset name
               id: save_asset_name
