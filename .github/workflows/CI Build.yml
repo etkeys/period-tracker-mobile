@@ -8,6 +8,7 @@ permissions:
 env:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     DOTNET_CLI_TELEMETRY_OPTOUT: true
+    IS_CI_CD_BUILD: true
 
 jobs:
     build-android:
@@ -34,9 +35,7 @@ jobs:
                   dotnet workload install maui --ignore-failed-sources
 
             - name: Build app
-              env:
-                IS_CI_CD_BUILD: true
-              run: dotnet build -c Release PeriodTracker.sln
+              run: dotnet build -c Release
 
             - name: Run tests
-              run: dotnet test -c Release --no-build -l:"console;verbosity=normal"
+              run: dotnet test -c Release --no-build -l:"console:verbosity=normal"
