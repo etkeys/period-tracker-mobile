@@ -15,10 +15,10 @@ public class TemporaryDirectoryFixture: IDisposable
 
     public TemporaryDirectoryFixture(){
         lock (_syncRoot){
-            if (_references < 1){
+            if (_references < 1)
                 Cleanup(true);
-                _references++;
-            }
+
+            _references++;
         }
     }
 
