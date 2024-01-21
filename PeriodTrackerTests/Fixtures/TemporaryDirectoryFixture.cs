@@ -8,12 +8,18 @@ namespace PeriodTrackerTests;
 public class TemporaryDirectoryFixture: IDisposable
 {
     private bool _disposed;
-    private readonly DirectoryInfo _tempDirectory;
+    private static int _references = 0;
+    private static readonly object _syncRoot = new();
+    private static readonly DirectoryInfo _tempDirectory =
+        new DirectoryInfo(Path.Combine(Path.GetTempPath(), "PeriodTrackerTests"));
 
     public TemporaryDirectoryFixture(){
-        _tempDirectory = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "PeriodTrackerTests"));
-
-        Cleanup(true);
+        lock (_syncRoot){
+            if (_references < 1){
+                Cleanup(true);
+                _references++;
+            }
+        }
     }
 
     private void CheckDisposed() =>
@@ -58,11 +64,10 @@ public class TemporaryDirectoryFixture: IDisposable
     public void Dispose(){
         if (_disposed) return;
 
-        // Add a sleep so that tests that are endings have a brief moment to
-        // finish releasing their resources.
-        Thread.Sleep(TimeSpan.FromSeconds(1));
-
-        Cleanup(false);
+        lock(_syncRoot){
+            if (--_references < 1)
+                Cleanup(false);
+        }
 
         _disposed = true;
     }
