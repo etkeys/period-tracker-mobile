@@ -64,10 +64,12 @@ public class TemporaryDirectoryFixture: IDisposable
     public void Dispose(){
         if (_disposed) return;
 
+#if !IS_CI_CD_BUILD
         lock(_syncRoot){
             if (--_references < 1)
                 Cleanup(false);
         }
+#endif
 
         _disposed = true;
     }
