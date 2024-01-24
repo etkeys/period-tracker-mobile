@@ -57,11 +57,35 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             NextCycleStartDateText = mostRecentCycleStart.Value
                 .AddDays(defaultCycleLengthDays)
                 .ToString("D");
+
+            await CheckForUpdates();
         }
         finally{
             IsBusy = false;
             dataRefreshRequired = false;
         }
+    }
+
+    private async Task CheckForUpdates(){
+        using var updateSvc = ServiceHelper.GetService<IUpdateService>()!;
+
+        if (!await updateSvc.GetShouldCheckForUpdates()) return;
+
+        var latestVersion = await updateSvc.GetLatestVersion();
+
+        await updateSvc.SetNextNotifyTime();
+
+        // TODO need to add logging or something
+        if (latestVersion is null) return;
+
+        var currentVersion = ServiceHelper.GetService<IAppInfo>()!.Version;
+
+        if (latestVersion > currentVersion)
+            await ServiceHelper.GetService<IAlertService>()
+                !.ShowAlertAsync(
+                    "Update available",
+                    $"New version {latestVersion:3} is available. For instructions about how to upate, see About > How to update."
+                );
     }
 
 }

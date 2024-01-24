@@ -38,13 +38,14 @@ public class TemporaryDirectoryFixture: IDisposable
     }
 
     public DirectoryInfo CreateTestCaseDirectory(
-        string testCaseName,
+        string testCaseName = "",
         [CallerMemberName] string testMethodName = "",
         [CallerFilePath] string testCodeFilePath = ""
         )
         {
             var dirNames = new Stack<string>();
-            dirNames.Push(testCaseName);
+            if (!string.IsNullOrWhiteSpace(testCaseName))
+                dirNames.Push(testCaseName);
             dirNames.Push(testMethodName);
 
             var parentDir = new FileInfo(testCodeFilePath).Directory!;
