@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Immutable;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 
 namespace PeriodTracker;
 
@@ -91,6 +89,19 @@ public partial class Repository : IDisposable
         });
     }
 
+    public Task<string> GetAppState(AppStateProperty property){
+        CheckDisposed();
+
+        return Task.Run(() => {
+            using var command = _connection.CreateCommand();
+
+            command.CommandText = "SELECT PropertyValue FROM AppState WHERE PropertyName = $propName";
+            command.Parameters.AddWithValue("$propName", property.ToString());
+
+            return command.ExecuteScalar()?.ToString() ?? string.Empty;
+        });
+    }
+
     public static async Task<Repository> GetContext(IDbInitializationInfo initInfo) {
         var db = new Repository(initInfo);
         try{
@@ -147,6 +158,42 @@ public partial class Repository : IDisposable
             orderby c.StartDate descending
             select c)
             .FirstOrDefault();
+    }
+
+    public Task SetAppState(AppStateProperty property, object value){
+        CheckDisposed();
+
+        if (value is null)
+            throw new ArgumentNullException(
+                nameof(value),
+                "Expected some value, but was given NULL.");
+
+        var type = property.GetDataTypeAttribute().Value;
+        if (value.GetType() != type)
+            throw new ArgumentException(
+                nameof(value),
+                $"Expected type {type.Name}, but got {value.GetType().Name}.");
+
+        return Task.Run(() => {
+            using var trans = _connection.BeginTransaction();
+            using var command = _connection.CreateCommand();
+            command.Transaction = trans;
+
+            try{
+                command.CommandText =
+                    "UPDATE AppState SET PropertyValue = $propValue WHERE PropertyName = $propName";
+                command.Parameters.AddWithValue("$propName", property.ToString());
+                command.Parameters.AddWithValue("$propValue", value);
+
+                command.ExecuteNonQuery();
+
+                trans.Commit();
+            }
+            catch{
+                trans.Rollback();
+                throw;
+            }
+        });
     }
 
 }

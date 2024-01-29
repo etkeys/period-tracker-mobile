@@ -22,6 +22,8 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
+        builder.Services.AddHttpClient();
+
         builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<AboutPage>();
         builder.Services.AddSingleton<AboutViewModel>();
@@ -31,6 +33,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<HistoryPage>();
         builder.Services.AddSingleton<HistoryViewModel>();
+
+        builder.Services.AddTransient<IUpdateService, UpdateService>();
 
         var app = builder.Build();
 

@@ -19,7 +19,18 @@
         </VerticalStackLayout>
 
         <Label
-            Text="Report a bug"
+            Text="How to update"
+            >
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding WebBrowserNavigateCommand}"
+                    CommandParameter="https://github.com/etkeys/period-tracker-mobile/wiki/Installing-Updating"
+                    />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <Label
+            Text="Report a bug or request a feature"
             >
             <Label.GestureRecognizers>
                 <TapGestureRecognizer
