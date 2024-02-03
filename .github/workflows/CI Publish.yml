@@ -47,9 +47,6 @@ jobs:
             - name: Run tests
               run: dotnet test -c Release --no-build -l:"console;verbosity=normal"
 
-            - name: Publish MAUI Android
-              run: dotnet publish -f net8.0-android --no-build
-
             - name: Save asset name
               id: save_asset_name
               shell: bash

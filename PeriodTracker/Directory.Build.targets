@@ -1,12 +1,12 @@
 
 <Project>
 
-    <Target Name="CopyPublishedAssetsAndroid"
-            AfterTargets="Publish"
+    <Target Name="PublishAssetsAndroid"
+            AfterTargets="Build"
             DependsOnTargets="CreateEasyPublishDir"
-            Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+            Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release' and '$(IsBuildCiPublish)' == 'true'">
         <PropertyGroup>
-            <OriginalFile>$(ProjectDir)$(PublishDir)$(ApplicationId)-Signed.apk</OriginalFile>
+            <OriginalFile>$(ProjectDir)$(OutDir)$(ApplicationId)-Signed.apk</OriginalFile>
             <CopiedFile>$(EasyPublishDir)$(ApplicationTitle).$(Version).apk</CopiedFile>
         </PropertyGroup>
 
