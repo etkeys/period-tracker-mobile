@@ -69,7 +69,7 @@
                                         Text="Start date: "
                                         />
                                     <Label
-                                        Text="{Binding StartDateText}"
+                                        Text="{Binding StartDate, StringFormat='{0:d}'}"
                                         />
                                 </HorizontalStackLayout>
                                 <HorizontalStackLayout
@@ -80,7 +80,7 @@
                                         Style="{StaticResource Muted}"
                                         />
                                     <Label
-                                        Text="{Binding RecordedDateText}"
+                                        Text="{Binding RecordedDate, StringFormat='{0:d}'}"
                                         Style="{StaticResource Muted}"
                                         />
                                 </HorizontalStackLayout>
