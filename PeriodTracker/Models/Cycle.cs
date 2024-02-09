@@ -3,9 +3,7 @@
 public class Cycle: IEquatable<Cycle>
 {
     public DateTime RecordedDate {get; init;}
-    public string RecordedDateText => RecordedDate.ToString("d");
     public DateTime StartDate {get; init;}
-    public string StartDateText => StartDate.ToString("d");
 
     public bool Equals(Cycle? other)
     {

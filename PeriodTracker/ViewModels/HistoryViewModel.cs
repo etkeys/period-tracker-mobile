@@ -26,7 +26,7 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
         var confirmDelete = await ServiceHelper.GetService<IAlertService>()
             !.ShowConfirmationAsync(
                 "Confirm delete",
-                $"Are you sure you want to delete cycle with start date \"{cycle.StartDateText}\"?");
+                $"Are you sure you want to delete cycle with start date \"{cycle.StartDate:d}\"?");
 
         if (!confirmDelete) return;
 
