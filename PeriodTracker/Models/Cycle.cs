@@ -1,9 +1,13 @@
-﻿namespace PeriodTracker;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PeriodTracker;
 
 public class Cycle: IEquatable<Cycle>
 {
-    public DateTime RecordedDate {get; init;}
-    public DateTime StartDate {get; init;}
+    public DateTime RecordedDate {get; set;}
+
+    [Key]
+    public DateTime StartDate {get; set;}
 
     public bool Equals(Cycle? other)
     {
