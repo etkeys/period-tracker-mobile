@@ -11,6 +11,7 @@ public class AppState
     public AppStateProperty AppStatePropertyId {get; set;}
 
     [MaxLength(2000)]
+    [Unicode(false)]
     public string Value {get; set;} = string.Empty;
 
 }
