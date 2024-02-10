@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using PeriodTracker;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeriodTracker;
 
@@ -64,7 +64,9 @@ public class UpdateService : IUpdateService
     public async Task<bool> GetShouldCheckForUpdates(){
         try{
             using var db = await _dbProvider.GetContext();
-            var nextNotifyDate = Convert.ToDateTime(await db.GetAppState(AppStateProperty.NotifyUpdateAvailableNextDate));
+            var nextNotifyDate = await db.GetAppStateValue(
+                AppStateProperty.NotifyUpdateAvailableNextDate,
+                Convert.ToDateTime);
 
             return nextNotifyDate <= DateTime.UtcNow.Date;
         }
@@ -77,10 +79,17 @@ public class UpdateService : IUpdateService
 
     public async Task SetNextNotifyTime(){
         using var db = await _dbProvider.GetContext();
-        var nextNotifyInterval = Convert.ToInt32(await db.GetAppState(AppStateProperty.NotifyUpdateAvailableInterval));
 
-        var nextNofityDate = DateTime.UtcNow.Date.AddDays(nextNotifyInterval);
-        await db.SetAppState(AppStateProperty.NotifyUpdateAvailableNextDate, nextNofityDate);
+        var nextNotifyInterval = await db.GetAppStateValue(
+            AppStateProperty.NotifyUpdateAvailableInterval,
+            Convert.ToInt32);
+
+        await db.AppState
+            .Where(a => a.AppStatePropertyId == AppStateProperty.NotifyUpdateAvailableNextDate)
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(
+                    a => a.Value,
+                    DateTime.UtcNow.AddDays(nextNotifyInterval).Date.ToString()));
     }
 
     private record JsonResponse(string tag_name);

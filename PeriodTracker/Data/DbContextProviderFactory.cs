@@ -15,9 +15,9 @@ public static class DbContextProviderFactory
 
     private class DbContextProvider(FileInfo databasePath) : IDbContextProvider
     {
-        public Task<Repository> GetContext(){
+        public Task<AppDbContext> GetContext(){
             var initInfo = new InitializationInfo(databasePath);
-            return Repository.GetContext(initInfo);
+            return Task.Run(() => new AppDbContext(initInfo));
         }
     }
 

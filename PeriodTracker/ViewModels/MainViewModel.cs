@@ -1,11 +1,12 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeriodTracker.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IEventBusListener
 {
-    private const int defaultCycleLengthDays = 28;
+    private const int _defaultCycleLengthDays = 28;
     private bool dataRefreshRequired = true;
     private readonly IDbContextProvider _dbProvider;
 
@@ -39,23 +40,27 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             IsCycleStartOverdue = false;
 
             using var db = await _dbProvider.GetContext();
-            var mostRecentCycleStart = (await db.GetMostRecentCycle())?.StartDate;
+            var mostRecentCycleStart = await
+                (from c in db.Cycles
+                orderby c.StartDate descending
+                select c.StartDate)
+                .FirstOrDefaultAsync();
             await delayTask;
 
-            if (mostRecentCycleStart is null) return;
+            if (mostRecentCycleStart.Equals(default)) return;
 
-            var daysEllapsed = (DateTime.Today - mostRecentCycleStart.Value).Days;
-            var daysUntilNext = defaultCycleLengthDays - daysEllapsed;
+            var daysEllapsed = (DateTime.Today - mostRecentCycleStart).Days;
+            var daysUntilNext = _defaultCycleLengthDays - daysEllapsed;
 
             DaysUntilNextCycleText = daysUntilNext switch {
-                0 when mostRecentCycleStart == DateTime.Today => $"{defaultCycleLengthDays}",
+                0 when mostRecentCycleStart == DateTime.Today => $"{_defaultCycleLengthDays}",
                 >= 0 => $"{daysUntilNext}",
                 _ => "0"
             };
 
             IsCycleStartOverdue = daysUntilNext < 0;
-            NextCycleStartDateText = mostRecentCycleStart.Value
-                .AddDays(defaultCycleLengthDays)
+            NextCycleStartDateText = mostRecentCycleStart
+                .AddDays(_defaultCycleLengthDays)
                 .ToString("D");
 
             await CheckForUpdates();

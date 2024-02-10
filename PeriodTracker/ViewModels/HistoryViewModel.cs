@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeriodTracker.ViewModels;
 
@@ -39,9 +40,9 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
 
             await delayTask;
 
-            if (deleted)
-                Cycles.RemoveAt(Cycles.IndexOf(cycle));
+            if (!deleted) return;
 
+            Cycles.RemoveAt(Cycles.IndexOf(cycle));
             await EventBus.BroadcastEvent(EventBusBroadcastedEvent.CyclesUpdated);
         }
         finally{
@@ -64,10 +65,12 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
 
             using var db = await _dbProvider.GetContext();
-            var cycles =
-                from c in await db.GetCycles()
+            var cycles = await
+                (from c in db.Cycles
                 orderby c.StartDate descending
-                select c;
+                select c)
+                .AsNoTracking()
+                .ToListAsync();
             Cycles = new ObservableCollection<Cycle>(cycles);
 
             dataRefreshRequired = false;
