@@ -1,8 +1,10 @@
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeriodTracker;
 
+[EntityTypeConfiguration(typeof(AppStateConfiguration))]
 public class AppState
 {
     [Key]
