@@ -61,39 +61,35 @@ namespace PeriodTracker.Data.Migrations
                 "DROP TABLE temp_Cycles",
             };
 
-            try{
-                foreach(var query in queries)
-                    migrationBuilder.Sql(query);
-            }
-            catch(Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            foreach(var query in queries)
+                migrationBuilder.Sql(query);
         }
 
         private void SaveExistingData(MigrationBuilder migrationBuilder){
             var queries = new []{
+                // Have to create the original definition of Cycles
+                // because if we don't, new installs will fail when
+                // we apply this migration.
+                @"CREATE TABLE IF NOT EXISTS Cycles (
+                    StartDate DATETIME PRIMARY KEY,
+                    RecordedDate DATETIME
+                )",
+
                 @"CREATE TABLE temp_Cycles AS
                 SELECT *
                 FROM Cycles",
 
-                @"DROP TABLE Cycles",
+                "DROP TABLE Cycles",
 
                 // We don't care about existing data in AppState because, at
                 // this point in the App's life, it'll only hold data that
                 // doesn't need to be preserved and is okay if it gets set
                 // back to default.
-                @"DROP TABLE AppState",
+                "DROP TABLE IF EXISTS AppState",
             };
 
-            try{
-                foreach(var query in queries)
-                    migrationBuilder.Sql(query);
-            }
-            catch(Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            foreach(var query in queries)
+                migrationBuilder.Sql(query);
         }
 
         /// <inheritdoc />
