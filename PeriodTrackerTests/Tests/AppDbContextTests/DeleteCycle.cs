@@ -2,7 +2,7 @@
 
 namespace PeriodTrackerTests;
 
-public partial class RepositoryTests
+public partial class AppDbContextTests
 {
 
     [Theory, MemberData(nameof(DeleteCycleTestsData))]

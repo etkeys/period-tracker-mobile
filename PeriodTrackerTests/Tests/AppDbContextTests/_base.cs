@@ -4,11 +4,11 @@ using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
-public partial class RepositoryTests : BaseTest, IClassFixture<TemporaryDirectoryFixture>
+public partial class AppDbContextTests : BaseTest, IClassFixture<TemporaryDirectoryFixture>
 {
     private readonly TemporaryDirectoryFixture _tempDir;
 
-    public RepositoryTests(TemporaryDirectoryFixture tempDirFixture){
+    public AppDbContextTests(TemporaryDirectoryFixture tempDirFixture){
         _tempDir = tempDirFixture;
     }
 

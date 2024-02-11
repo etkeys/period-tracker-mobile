@@ -2,7 +2,7 @@ using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
-public partial class RepositoryTests
+public partial class AppDbContextTests
 {
 
     [Fact]
