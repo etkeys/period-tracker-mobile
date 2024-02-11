@@ -19,11 +19,6 @@ public class DbContextProviderFactory: IDesignTimeDbContextFactory<AppDbContext>
         return new AppDbContext(builder.Options);
     }
 
-    private class InitializationInfo(FileInfo databaseFile): IDbInitializationInfo
-    {
-        public FileInfo Database => databaseFile;
-    }
-
     private class DbContextProvider(FileInfo databasePath) : IDbContextProvider
     {
         public Task<AppDbContext> GetContext(){

@@ -8,9 +8,7 @@ public enum AppStateProperty
 
     Unknown = 0,
 
-    [DataType(typeof(int))]
     NotifyUpdateAvailableInterval = 1,
 
-    [DataType(typeof(DateTime))]
     NotifyUpdateAvailableNextDate = 2,
 }

@@ -11,5 +11,14 @@ public partial class AppDbContext: DbContext
     public DbSet<AppState> AppState {get; set;} = null!;
     public DbSet<Cycle> Cycles {get; set;} = null!;
 
-    public AppDbContext(DbContextOptions<AppDbContext> options): base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options): base(options) {
+        SQLitePCL.Batteries_V2.Init();
+    }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, bool ensureCreated): base(options) {
+        SQLitePCL.Batteries_V2.Init();
+
+        if (ensureCreated)
+            Database.EnsureCreated();
+    }
 }

@@ -9,10 +9,7 @@ public partial class RepositoryTests
     public async Task AddCycleTests(TestCase test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
-        _dbInitInfoMock.Setup(p => p.Database)
-            .Returns(new FileInfo(Path.Combine(testTempDir.FullName, "_.db")));
-
-        using var db = await Repository.GetContext(_dbInitInfoMock.Object);
+        using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
         var inp = ((Cycle[]?)test.Inputs["cycles"])!;
 
@@ -20,7 +17,7 @@ public partial class RepositoryTests
         for(var i =0; i < inp.Length; i++)
             actInsertedResults[i] = await db.AddCycle(inp[i]);
 
-        var actInserted = (await db.GetCycles()).ToArray();
+        var actInserted = (from c in db.Cycles select c).ToArray();
 
         var expInserted = (Cycle[]?)test.Expected["cycles"];
         var expInsertedResults = (bool[]?)test.Expected["insert results"];
