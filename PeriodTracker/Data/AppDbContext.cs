@@ -1,20 +1,15 @@
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace PeriodTracker;
 
+// To create migrations run the following:
+// dotnet ef migrations add "<migration name>" --framework net8.0
+
 public partial class AppDbContext: DbContext
 {
-    private readonly IDbInitializationInfo _initInfo;
-
     public DbSet<AppState> AppState {get; set;} = null!;
     public DbSet<Cycle> Cycles {get; set;} = null!;
 
-    public AppDbContext(IDbInitializationInfo initInfo){
-        _initInfo = initInfo;
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite($"Data Source={_initInfo.Database}");
-    }
+    public AppDbContext(DbContextOptions<AppDbContext> options): base(options) { }
 }

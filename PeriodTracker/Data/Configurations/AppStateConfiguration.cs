@@ -13,8 +13,8 @@ public class AppStateConfiguration : IEntityTypeConfiguration<AppState>
                 Value = "2"
             },
             new {
-                AppStatePropertyId = AppStateProperty.NotifyUpdateAvailableInterval,
-                Value = DateTime.Parse("2024-01-01").ToString()
+                AppStatePropertyId = AppStateProperty.NotifyUpdateAvailableNextDate,
+                Value = DateTime.Parse("2024-01-01").ToString("s")
             }
         );
     }
