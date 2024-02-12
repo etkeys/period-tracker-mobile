@@ -2,5 +2,5 @@
 
 public interface IDbContextProvider
 {
-    Task<Repository> GetContext();
+    Task<AppDbContext> GetContext();
 }

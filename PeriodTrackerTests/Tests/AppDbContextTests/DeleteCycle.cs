@@ -2,24 +2,21 @@
 
 namespace PeriodTrackerTests;
 
-public partial class RepositoryTests
+public partial class AppDbContextTests
 {
 
     [Theory, MemberData(nameof(DeleteCycleTestsData))]
     public async Task DeleteCycleTests(TestCase test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
-        _dbInitInfoMock.Setup(p => p.Database)
-            .Returns(new FileInfo(Path.Combine(testTempDir.FullName, "_.db")));
+        await SetupDatabase(testTempDir, test.Setups);
 
-        using var db = await Repository.GetContext(_dbInitInfoMock.Object);
-
-        await SetupDatabase(db, test.Setups);
+        using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
         var toDelete = ((Cycle?)test.Inputs["cycle"])!;
 
         var actDeleteResult = await db.DeleteCycle(toDelete);
-        var actCycles = (await db.GetCycles()).ToArray();
+        var actCycles = (from c in db.Cycles select c).ToArray();
 
         var expCycles = (Cycle[]?)test.Expected["cycles"];
         var expDeleteResult = (bool?)test.Expected["delete result"];
@@ -34,7 +31,7 @@ public partial class RepositoryTests
             .WithSetup(
                 "database",
                 new Dictionary<string, object[]>{
-                    {"cycles", new[]{
+                    {"Cycle", new[]{
                         new Cycle{
                             RecordedDate = DateTime.Today,
                             StartDate = DateTime.Parse("2023-11-01"),
@@ -61,7 +58,7 @@ public partial class RepositoryTests
             .WithSetup(
                 "database",
                 new Dictionary<string, object[]>{
-                    {"cycles", new[]{
+                    {"Cycle", new[]{
                         new Cycle{
                             RecordedDate = DateTime.Today,
                             StartDate = DateTime.Parse("2023-11-01"),

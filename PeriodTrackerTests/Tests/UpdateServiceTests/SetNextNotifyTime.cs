@@ -10,15 +10,21 @@ public partial class UpdateServiceTests
     public async Task SetNextNotifyTimeTests(TestCase test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
-        using var db = await SetupDb(testTempDir, test.Setups["database"]!);
-        _dbContextProviderMock.Setup(m => m.GetContext()).Returns(Task.Run(() => db));
-        _httpClientFactoryMock.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+        await SetupDatabase(testTempDir, test.Setups);
 
-        using var actor = new UpdateService(_httpClientFactoryMock.Object, _dbContextProviderMock.Object);
-        await actor.SetNextNotifyTime();
+        using (var db = new AppDbContext(CreateDbContextOptions(testTempDir), true)){
+            _dbContextProviderMock.Setup(m => m.GetContext()).Returns(Task.Run(() => db));
+            _httpClientFactoryMock.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
 
-        using var actDb = await Repository.GetContext(_dbInitInfoMock.Object);
-        var actDate = Convert.ToDateTime(await actDb.GetAppState(AppStateProperty.NotifyUpdateAvailableNextDate));
+            using var actor = new UpdateService(_httpClientFactoryMock.Object, _dbContextProviderMock.Object);
+            await actor.SetNextNotifyTime();
+            // actor should dispose of db
+            await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+                db.GetAppStateValue(AppStateProperty.NotifyUpdateAvailableNextDate, Convert.ToDateTime));
+        }
+
+        using var db2 = new AppDbContext(CreateDbContextOptions(testTempDir), true);
+        var actDate = await db2.GetAppStateValue(AppStateProperty.NotifyUpdateAvailableNextDate, Convert.ToDateTime);
         var expDate = (DateTime)test.Expected["date"]!;
 
         Assert.Equal(expDate, actDate);
@@ -46,13 +52,7 @@ public partial class UpdateServiceTests
             .WithExpected("date", DateTime.UtcNow.AddDays(1).Date)
 
         ,new TestCase("Interval is 2")
-            .WithSetup(
-                "database",
-                new Dictionary<string, object[]>{
-                    {"AppState", new object[]{
-                        new object[]{AppStateProperty.NotifyUpdateAvailableInterval, 2}
-                    }}
-                })
+            // No setup because database default is enough
             .WithExpected("date", DateTime.UtcNow.AddDays(2).Date)
 
         ,new TestCase("Interval is -1") //just for fun

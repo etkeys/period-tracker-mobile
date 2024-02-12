@@ -43,6 +43,8 @@ public partial class CycleEditViewModel : ViewModelBase
 
             using var db = await _dbProvider.GetContext();
             if (!await db.AddCycle(newEntry)){
+                // TODO Need to get back failure reason.
+                // We're assuming that failure was due to a duplicate
                 await ServiceHelper.GetService<IAlertService>()
                     !.ShowAlertAsync(
                         "Save failed",

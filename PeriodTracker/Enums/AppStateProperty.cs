@@ -6,9 +6,9 @@ public enum AppStateProperty
 {
     // NOTE: When adding or changing properties, a migration is needed.
 
-    [DataType(typeof(int))]
-    NotifyUpdateAvailableInterval,
+    Unknown = 0,
 
-    [DataType(typeof(DateTime))]
-    NotifyUpdateAvailableNextDate,
+    NotifyUpdateAvailableInterval = 1,
+
+    NotifyUpdateAvailableNextDate = 2,
 }
