@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PeriodTracker.ViewModels;
 
@@ -39,6 +40,13 @@ public static class MauiProgram
         var app = builder.Build();
 
         ServiceHelper.Initialize(app.Services);
+
+        using var db = app.Services.GetService<IDbContextProvider>()
+            !.GetContext()
+            .GetAwaiter()
+            .GetResult();
+
+        db.Database.Migrate();
 
 		return app;
 	}
