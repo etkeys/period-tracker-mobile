@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <AndroidSdkDirectory>$(ANDROID_HOME)</AndroidSdkDirectory>
+        <IsBuildCiPublish Condition="'$(IsBuildCiPublish)' == ''">$(IS_BUILD_CI_PUBLISH)</IsBuildCiPublish>
+        <IsCiCdBuild Condition="'$(IsCiCdBuild)' == ''">$(IS_CI_CD_BUILD)</IsCiCdBuild>
+        <SolutionDir Condition="'$(SolutionDir)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), PeriodTracker.sln))</SolutionDir>
+    </PropertyGroup>
+</Project>

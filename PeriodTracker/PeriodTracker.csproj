@@ -1,12 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <SolutionDir Condition="'$(SolutionDir)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), PeriodTracker.sln))</SolutionDir>
-        <IsBuildCiPublish Condition="'$(IsBuildCiPublish)' == ''">$(IS_BUILD_CI_PUBLISH)</IsBuildCiPublish>
-    </PropertyGroup>
-    <PropertyGroup>
-        <AndroidSdkDirectory>\home\erik\Android\Sdk\</AndroidSdkDirectory>
-    </PropertyGroup>
 	<PropertyGroup>
 		<!-- Versions -->
 		<ApplicationDisplayVersion>0.3.0</ApplicationDisplayVersion>
