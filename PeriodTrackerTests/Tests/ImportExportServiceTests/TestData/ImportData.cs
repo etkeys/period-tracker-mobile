@@ -343,7 +343,7 @@ public partial class ImportExportServiceTests
                 payloadBuilder.Append('}');
 
                 yield return
-                    ($"Payload missing table: {missingTableName}",
+                    ($"Payload missing table {missingTableName}",
                     new TestParameters(
                         new Inputs {
                             AppVersion = new Version(VersionStringDefault),
