@@ -21,4 +21,10 @@ public partial class AppDbContext: DbContext
         if (ensureCreated)
             Database.EnsureCreated();
     }
+
+    public async Task ClearAllTables()
+    {
+        await AppState.Where(_ => true).ExecuteDeleteAsync();
+        await Cycles.Where(_ => true).ExecuteDeleteAsync();
+    }
 }

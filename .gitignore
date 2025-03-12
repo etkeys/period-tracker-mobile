@@ -1,6 +1,8 @@
+.vscode
 **/bin/
 **/obj/
 publish/
 PeriodTracker/commit_hash.txt
 PeriodTracker.keystore
+**/*.user
 
