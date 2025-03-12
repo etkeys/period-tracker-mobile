@@ -1,4 +1,5 @@
 #nullable disable
+using CommunityToolkit.Maui.Alerts;
 
 namespace PeriodTracker;
 
@@ -10,6 +11,7 @@ public interface IAlertService
     // ----- async calls (use with "await" - MUST BE ON DISPATCHER THREAD) -----
     Task ShowAlertAsync(string title, string message, string cancel = "OK");
     Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No");
+    Task ShowToastAsync(string message);
 
     // ----- "Fire and forget" calls -----
     void ShowAlert(string title, string message, string cancel = "OK");
@@ -30,6 +32,11 @@ internal class AlertService : IAlertService
     public Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
     {
         return Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
+    }
+
+    public Task ShowToastAsync(string message)
+    {
+        return Toast.Make(message).Show();
     }
 
 

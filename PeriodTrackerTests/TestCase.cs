@@ -3,6 +3,7 @@ namespace PeriodTrackerTests;
 
 using Collection = Dictionary<string, object?>;
 
+[Obsolete("Use TestCase<TParameters> instead.")]
 public class TestCase(string name)
 {
     private Collection _expected = new();
@@ -29,4 +30,13 @@ public class TestCase(string name)
         _setups.Add(key, value);
         return this;
     }
+}
+
+public class TestCase<TParameters>(string name, TParameters parameters)
+{
+    public string Name => name;
+
+    public TParameters Parameters => parameters;
+
+    public override string ToString() => Name;
 }

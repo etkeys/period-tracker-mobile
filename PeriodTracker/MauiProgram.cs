@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PeriodTracker.Services;
 using PeriodTracker.ViewModels;
 
 namespace PeriodTracker;
@@ -25,6 +27,9 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
 
+        builder.Services.AddSingleton<IFilePicker>(FilePicker.Default);
+        builder.Services.AddSingleton<IFolderPicker>(FolderPicker.Default);
+
         builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<AboutPage>();
         builder.Services.AddSingleton<AboutViewModel>();
@@ -35,6 +40,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<HistoryPage>();
         builder.Services.AddSingleton<HistoryViewModel>();
 
+        builder.Services.AddTransient<ImportExportPage>();
+        builder.Services.AddTransient<ImportExportViewModel>(sp => new ImportExportViewModel(sp));
+        builder.Services.AddTransient<IImportExportService, ImportExportService>();
         builder.Services.AddTransient<IUpdateService, UpdateService>();
 
         var app = builder.Build();

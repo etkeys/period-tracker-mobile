@@ -21,6 +21,11 @@
         Route="HistoryPage" />
 
     <ShellContent
+        Title="Import/Export"
+        ContentTemplate="{DataTemplate local:ImportExportPage}"
+        Route="ImportExportPage" />
+
+    <ShellContent
         Title="About"
         ContentTemplate="{DataTemplate local:AboutPage}"
         Route="AboutPage" />

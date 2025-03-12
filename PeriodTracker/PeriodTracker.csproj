@@ -27,7 +27,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>PeriodTracker</ApplicationTitle>
+		<ApplicationTitle>Period Tracker</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.etkeys.periodtracker</ApplicationId>
@@ -69,6 +69,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+        <PackageReference Include="System.IO.Packaging" Version="9.0.2" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
