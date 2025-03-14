@@ -47,7 +47,7 @@ public partial class ImportExportViewModel: ViewModelBase
         catch(Exception ex)
         {
             Debug.WriteLine($"Error during export: {ex}");
-            await _alertService.ShowAlertAsync("Error", ex.Message);
+            await _alertService.ShowAlertAsync("Error", ExceptionHelper.GetMessages(ex));
         }
         finally
         {
@@ -83,7 +83,7 @@ public partial class ImportExportViewModel: ViewModelBase
         catch(Exception ex)
         {
             Debug.WriteLine($"Error during export: {ex}");
-            await _alertService.ShowAlertAsync("Error", ex.Message);
+            await _alertService.ShowAlertAsync("Error", ExceptionHelper.GetMessages(ex));
         }
         finally
         {
