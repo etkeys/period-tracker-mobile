@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:mauitoolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:Class="PeriodTracker.ImportExportPage"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:viewmodel="clr-namespace:PeriodTracker.ViewModels"
+             x:Class="PeriodTracker.ImportExportPage"
              x:DataType="viewmodel:ImportExportViewModel"
              Title="Import/Export">
 
@@ -30,7 +30,6 @@ Using Export, you can take the data from this device and put in on a different d
             Clicked="OnExportClicked"
             IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
             HorizontalOptions="Fill" />
-        <BoxView HeightRequest="1" Color="{StaticResource Grey100}" />
         <Label Text="Import"
                 Style="{StaticResource SubHeadline}"
                 HorizontalOptions="Center"/>
