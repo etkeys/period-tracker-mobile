@@ -28,9 +28,11 @@
 
 		<!-- Display name -->
 		<ApplicationTitle>Period Tracker</ApplicationTitle>
+        <ApplicationTitle Condition="'$(Configuration)' != 'Release'">$(ApplicationTitle)-Preview</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.etkeys.periodtracker</ApplicationId>
+		<ApplicationId Condition="'$(Configuration)' != 'Release'">$(ApplicationId)preview</ApplicationId>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
@@ -38,6 +40,9 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+
+        <PathToAppIconFg>Resources\AppIcon\appiconfg.svg</PathToAppIconFg>
+        <PathToAppIconFg Condition="'$(Configuration)' != 'Release'">Resources\AppIcon\appiconfg-preview.svg</PathToAppIconFg>
 	</PropertyGroup>
 
     <PropertyGroup>
@@ -52,7 +57,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="$(PathToAppIconFg)" Color="#512BD4" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#9e1a53" BaseSize="128,128" />
