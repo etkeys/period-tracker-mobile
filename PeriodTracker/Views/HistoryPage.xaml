@@ -67,10 +67,7 @@
                                     Grid.Row="0"
                                     Grid.Column="0">
                                     <Label
-                                        Text="Start date: "
-                                        />
-                                    <Label
-                                        Text="{Binding StartDate, StringFormat='{0:d}'}"
+                                        Text="{Binding StartDate, StringFormat='Start Date: {0:d}'}"
                                         />
                                 </HorizontalStackLayout>
                                 <HorizontalStackLayout
@@ -84,11 +81,7 @@
                                     Grid.Row="2"
                                     Grid.Column="0">
                                     <Label
-                                        Text="Recorded: "
-                                        Style="{StaticResource Muted}"
-                                        />
-                                    <Label
-                                        Text="{Binding RecordedDate, StringFormat='{0:d}'}"
+                                        Text="{Binding RecordedDate, StringFormat='Recorded: {0:d}'}"
                                         Style="{StaticResource Muted}"
                                         />
                                 </HorizontalStackLayout>
