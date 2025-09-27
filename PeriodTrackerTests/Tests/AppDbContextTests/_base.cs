@@ -30,13 +30,13 @@ public partial class AppDbContextTests : BaseTest, IClassFixture<TemporaryDirect
         );
     }
 
-    private void AssertCyclesHistory(CycleHistory[]? expected, CycleHistory[]? actual)
+    private void AssertCyclesHistory(List<CycleHistory> expected, List<CycleHistory> actual)
     {
         if (expected is null && actual is null) return;
         if (expected is null || actual is null)
             Assert.Fail("Either expected or actual are null");
 
-        Assert.Equal(expected.Length, actual.Length);
+        Assert.Equal(expected.Count, actual.Count);
         Assert.All(
             expected,
             exp =>

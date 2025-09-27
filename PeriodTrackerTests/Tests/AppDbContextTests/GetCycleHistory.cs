@@ -1,80 +1,135 @@
+using System.Collections;
 using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
 public partial class AppDbContextTests
 {
-
-    [Theory, MemberData(nameof(GetCycleHistoryTestsData))]
-    public async Task GetCycleHistoryTests(TestCase test)
+    [Theory, ClassData(typeof(GetCycleHistoryTestData))]
+    public async Task GetCycleHistoryTests(TestCase<GetCycleHistoryTestData.TestParameters> t)
     {
-        var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
+        var testTempDir = _tempDir.CreateTestCaseDirectory(t.Name);
+
+        await SetupDatabase(testTempDir, t.Parameters.Inputs.GetSeedData());
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
-        var inp = ((Cycle[]?)test.Inputs["cycles"])!;
-
-        foreach (var c in inp)
-            await db.AddCycle(c);
-
         var act = await db.GetCycleHistory();
+        var exp = t.Parameters.Expected.Cycles;
 
-        var exp = (CycleHistory[]?)test.Expected["cycles"];
-
-        AssertCyclesHistory(exp, act.ToArray());
+        AssertCyclesHistory(exp, act);
     }
 
-    public static IEnumerable<object[]> GetCycleHistoryTestsData =>
-        new[] {
-            new TestCase("No cycles")
-            .WithInput("cycles", Array.Empty<Cycle>())
-            .WithExpected("cycles", Array.Empty<CycleHistory>()),
+    public class GetCycleHistoryTestData : IEnumerable<object[]>
+    {
+        public record TestParameters(Inputs Inputs, ExpectedResults Expected);
 
-            new TestCase("One cycle")
-            .WithInput("cycles", new[] {
-                new Cycle {
-                    RecordedDate = DateTime.Today,
-                    StartDate = DateTime.Parse("2023-11-01"),
-                } })
-            .WithExpected("cycles", new[] {
-                new CycleHistory {
-                    RecordedDate = DateTime.Today,
-                    StartDate = DateTime.Parse("2023-11-01"),
-                    CycleLengthDays = 0
-                } }),
+        private readonly List<(string Name, TestParameters Parameters)> _testCases = [
+            ("No cycles", NoCycles()),
+            ("One cycle", OneCycle()),
+            ("Many cycles", ManyCycles()),
+        ];
 
-            new TestCase("Many cycles")
-            .WithInput("cycles", new[] {
-                new Cycle {
-                    RecordedDate = DateTime.Today,
-                    StartDate = DateTime.Parse("2023-10-01"),
+        private static TestParameters NoCycles()
+        {
+            var inpCycles = new List<Cycle>();
+
+            var expCycles = new List<CycleHistory>();
+
+            return new TestParameters(
+                new Inputs{
+                    Cycles = inpCycles
                 },
-                new Cycle {
-                    RecordedDate = DateTime.Today,
-                    StartDate = DateTime.Parse("2023-11-01")
-                },
-                new Cycle {
-                    RecordedDate = DateTime.Today,
-                    StartDate = DateTime.Parse("2023-12-01")
+                new ExpectedResults{ Cycles = expCycles}
+            );
+        }
+
+        private static TestParameters OneCycle()
+        {
+            var inpCycles = new List<Cycle>{
+                new Cycle{
+                    StartDate = DateTime.Parse("2023-11-01"),
+                    RecordedDate = DateTime.Today
                 }
-            })
-            .WithExpected("cycles", new[] {
-                new CycleHistory {
+            };
+
+            var expCycles = new List<CycleHistory>{
+                new CycleHistory{
+                    StartDate = DateTime.Parse("2023-11-01"),
                     RecordedDate = DateTime.Today,
+                    CycleLengthDays = 0
+                }
+            };
+
+            return new TestParameters(
+                new Inputs{
+                    Cycles = inpCycles
+                },
+                new ExpectedResults{ Cycles = expCycles}
+            );
+        }
+
+        private static TestParameters ManyCycles()
+        {
+            var inpCycles = new List<Cycle>{
+                new Cycle{
+                    StartDate = DateTime.Parse("2023-10-01"),
+                    RecordedDate = DateTime.Today
+                },
+                new Cycle{
+                    StartDate = DateTime.Parse("2023-11-01"),
+                    RecordedDate = DateTime.Today
+                },
+                new Cycle{
                     StartDate = DateTime.Parse("2023-12-01"),
+                    RecordedDate = DateTime.Today
+                }
+            };
+
+            var expCycles = new List<CycleHistory>{
+                new CycleHistory{
+                    StartDate = DateTime.Parse("2023-12-01"),
+                    RecordedDate = DateTime.Today,
                     CycleLengthDays = 30
                 },
-                new CycleHistory {
-                    RecordedDate = DateTime.Today,
+                new CycleHistory{
                     StartDate = DateTime.Parse("2023-11-01"),
+                    RecordedDate = DateTime.Today,
                     CycleLengthDays = 31
                 },
-                new CycleHistory {
-                    RecordedDate = DateTime.Today,
+                new CycleHistory{
                     StartDate = DateTime.Parse("2023-10-01"),
+                    RecordedDate = DateTime.Today,
                     CycleLengthDays = 0
                 }
-            })
+            };
+
+            return new TestParameters(
+                new Inputs{
+                    Cycles = inpCycles
+                },
+                new ExpectedResults{ Cycles = expCycles}
+            );
         }
-        .Select(tc => new object[] { tc });
+
+        public IEnumerator<object[]> GetEnumerator() =>
+            _testCases.Select(c => new object[] { new TestCase<TestParameters>(c.Name, c.Parameters) })
+                .GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public class ExpectedResults
+        {
+            public List<CycleHistory> Cycles { get; set; } = [];
+        }
+
+        public class Inputs
+        {
+            public List<Cycle> Cycles { get; set; } = [];
+
+            public SeedData GetSeedData() => new() {
+                Cycles = Cycles
+            };
+        }
+    }
 }
