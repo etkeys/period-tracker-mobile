@@ -14,14 +14,14 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
 
         _dbProvider = dbProvider;
 
-        DeleteCycleCommand = new AsyncRelayCommand<Cycle>(DeleteCycle);
+        DeleteCycleCommand = new AsyncRelayCommand<CycleHistory>(DeleteCycle);
     }
 
-    public ObservableCollection<Cycle> Cycles {get; private set;} = new();
+    public ObservableCollection<CycleHistory> Cycles {get; private set;} = new();
 
-    public IAsyncRelayCommand<Cycle> DeleteCycleCommand {get;}
+    public IAsyncRelayCommand<CycleHistory> DeleteCycleCommand {get;}
 
-    private async Task DeleteCycle(Cycle? cycle){
+    private async Task DeleteCycle(CycleHistory? cycle){
         if (cycle is null) return;
 
         var confirmDelete = await ServiceHelper.GetService<IAlertService>()
@@ -65,13 +65,9 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
 
             using var db = await _dbProvider.GetContext();
-            var cycles = await
-                (from c in db.Cycles
-                orderby c.StartDate descending
-                select c)
-                .AsNoTracking()
-                .ToListAsync();
-            Cycles = new ObservableCollection<Cycle>(cycles);
+            var cycles = await db.GetCycleHistory();
+
+            Cycles = new ObservableCollection<CycleHistory>(cycles);
 
             dataRefreshRequired = false;
         }
