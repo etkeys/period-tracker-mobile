@@ -46,7 +46,7 @@
                 EmptyView="No cycles have been recorded"
             >
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="local:Cycle">
+                    <DataTemplate x:DataType="local:CycleHistory">
                         <Border
                             Margin="5"
                         >
@@ -55,6 +55,7 @@
                                 VerticalOptions="Center"
                                 >
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
@@ -76,6 +77,13 @@
                                     Grid.Row="1"
                                     Grid.Column="0">
                                     <Label
+                                        Text="{Binding CycleLengthDays, StringFormat='{0} days'}"
+                                        />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout
+                                    Grid.Row="2"
+                                    Grid.Column="0">
+                                    <Label
                                         Text="Recorded: "
                                         Style="{StaticResource Muted}"
                                         />
@@ -85,7 +93,7 @@
                                         />
                                 </HorizontalStackLayout>
                                 <ImageButton
-                                    Grid.RowSpan="2"
+                                    Grid.RowSpan="3"
                                     Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=BindingContext.DeleteCycleCommand, Source={x:Reference cycleList}}"
