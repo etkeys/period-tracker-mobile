@@ -13,7 +13,7 @@ public class AppStateConfiguration : IEntityTypeConfiguration<AppState>
             },
             new AppState {
                 AppStatePropertyId = AppStateProperty.NotifyUpdateAvailableNextDate,
-                Value = DateTime.Parse("2024-01-01").ToString("s")
+                Value = "2024-01-01T00:00:00"
             }
     ];
 
