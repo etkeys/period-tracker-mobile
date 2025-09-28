@@ -10,8 +10,10 @@ public partial class AppDbContext: DbContext
 {
     public DbSet<AppState> AppState {get; set;} = null!;
     public DbSet<Cycle> Cycles {get; set;} = null!;
+    public DbSet<CycleHistory> CycleHistory {get; set;} = null!;
 
-    public AppDbContext(DbContextOptions<AppDbContext> options): base(options) {
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
         SQLitePCL.Batteries_V2.Init();
     }
 
@@ -19,7 +21,7 @@ public partial class AppDbContext: DbContext
         SQLitePCL.Batteries_V2.Init();
 
         if (ensureCreated)
-            Database.EnsureCreated();
+            Database.Migrate();
     }
 
     public async Task ClearAllTables()

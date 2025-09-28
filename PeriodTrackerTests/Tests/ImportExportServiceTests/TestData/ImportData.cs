@@ -320,7 +320,7 @@ public partial class ImportExportServiceTests
                     payloadBuilder.AppendLine();
                     payloadBuilder.AppendLine("\"AppStates\": [");
                     payloadBuilder.AppendLine("{\"AppStatePropertyId\": 1, \"Value\": \"2\"},");
-                    payloadBuilder.AppendLine("{\"AppStatePropertyId\": 2, \"Value\": \"2024-01-01 00:00:00\"}");
+                    payloadBuilder.AppendLine("{\"AppStatePropertyId\": 2, \"Value\": \"2024-01-01T00:00:00\"}");
                     payloadBuilder.Append("],");
                 }
                 else
@@ -388,15 +388,15 @@ public partial class ImportExportServiceTests
         private static readonly List<Cycle> InitialCycles = new () {
                 new Cycle{
                     StartDate = DateTime.Parse("2025-01-15"),
-                    RecordedDate = DateTime.Now.Date
+                    RecordedDate = DateTime.Parse("2025-03-01").ToUniversalTime().Date
                 },
                 new Cycle{
                     StartDate = DateTime.Parse("2025-01-31"),
-                    RecordedDate = DateTime.Now.Date
+                    RecordedDate = DateTime.Parse("2025-03-01").ToUniversalTime().Date
                 },
                 new Cycle{
                     StartDate = DateTime.Parse("2025-02-15"),
-                    RecordedDate = DateTime.Now.Date
+                    RecordedDate = DateTime.Parse("2025-03-01").ToUniversalTime().Date
                 }
         };
 

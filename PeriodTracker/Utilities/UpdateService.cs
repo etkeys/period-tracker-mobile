@@ -84,12 +84,11 @@ public class UpdateService : IUpdateService
             AppStateProperty.NotifyUpdateAvailableInterval,
             Convert.ToInt32);
 
+        var newValue = DateTime.UtcNow.AddDays(nextNotifyInterval).Date.ToString("s");
         await db.AppState
             .Where(a => a.AppStatePropertyId == AppStateProperty.NotifyUpdateAvailableNextDate)
             .ExecuteUpdateAsync(s =>
-                s.SetProperty(
-                    a => a.Value,
-                    DateTime.UtcNow.AddDays(nextNotifyInterval).Date.ToString()));
+                s.SetProperty(a => a.Value, newValue));
     }
 
     private record JsonResponse(string tag_name);
