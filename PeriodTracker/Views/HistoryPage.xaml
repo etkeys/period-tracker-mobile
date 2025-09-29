@@ -66,42 +66,27 @@
                         >
                             <Grid
                                 Margin="5"
-                                VerticalOptions="Center"
-                                >
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                                VerticalOptions="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <HorizontalStackLayout
-                                    Grid.Row="0"
-                                    Grid.Column="0">
+                                <VerticalStackLayout
+                                    Grid.Column="0"
+                                    >
                                     <Label
                                         Text="{Binding StartDate, StringFormat='Start Date: {0:d}'}"
                                         />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout
-                                    Grid.Row="1"
-                                    Grid.Column="0">
                                     <Label
-                                        Text="{Binding CycleLengthDays, StringFormat='{0} days'}"
+                                        Text="{Binding CycleLengthDays, StringFormat='Length: {0} days'}"
+                                        Style="{StaticResource Subtext}"
                                         />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout
-                                    Grid.Row="2"
-                                    Grid.Column="0">
                                     <Label
                                         Text="{Binding RecordedDate, StringFormat='Recorded: {0:d}'}"
                                         Style="{StaticResource Muted}"
                                         />
-                                </HorizontalStackLayout>
+                                </VerticalStackLayout>
                                 <ImageButton
-                                    Grid.RowSpan="3"
-                                    Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=BindingContext.DeleteCycleCommand, Source={x:Reference cycleList}}"
                                     CommandParameter="{Binding}"
@@ -110,7 +95,6 @@
                                     WidthRequest="32"
                                     Margin="5"
                                 />
-
                             </Grid>
                         </Border>
                     </DataTemplate>
