@@ -16,25 +16,38 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <VerticalStackLayout
+    <Grid
         Padding="30,0"
-        Spacing="25">
+        RowSpacing="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Label 
+            Grid.Row="0"
             Text="Cycle History"
             Style="{StaticResource Headline}"
             SemanticProperties.HeadingLevel="Level1"
             />
 
         <ActivityIndicator
+            Grid.Row="1"
             IsRunning="{Binding IsBusy}"
             IsVisible="{Binding IsBusy}"
             Color="{StaticResource Primary}" />
 
-        <VerticalStackLayout
+        <Grid
+            Grid.Row="2"
             IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
-            Spacing="25">
+            RowSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
             <Button
+                Grid.Row="0"
                 Text="Record start of period"
                 Clicked="OnRecordNewClicked"
                 IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
@@ -42,6 +55,7 @@
 
             <CollectionView
                 x:Name="cycleList"
+                Grid.Row="1"
                 ItemsSource="{Binding Cycles}"
                 EmptyView="No cycles have been recorded"
             >
@@ -52,42 +66,27 @@
                         >
                             <Grid
                                 Margin="5"
-                                VerticalOptions="Center"
-                                >
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                                VerticalOptions="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <HorizontalStackLayout
-                                    Grid.Row="0"
-                                    Grid.Column="0">
+                                <VerticalStackLayout
+                                    Grid.Column="0"
+                                    >
                                     <Label
                                         Text="{Binding StartDate, StringFormat='Start Date: {0:d}'}"
                                         />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout
-                                    Grid.Row="1"
-                                    Grid.Column="0">
                                     <Label
-                                        Text="{Binding CycleLengthDays, StringFormat='{0} days'}"
+                                        Text="{Binding CycleLengthDays, StringFormat='Length: {0} days'}"
+                                        Style="{StaticResource Subtext}"
                                         />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout
-                                    Grid.Row="2"
-                                    Grid.Column="0">
                                     <Label
                                         Text="{Binding RecordedDate, StringFormat='Recorded: {0:d}'}"
                                         Style="{StaticResource Muted}"
                                         />
-                                </HorizontalStackLayout>
+                                </VerticalStackLayout>
                                 <ImageButton
-                                    Grid.RowSpan="3"
-                                    Grid.Row="0"
                                     Grid.Column="1"
                                     Command="{Binding Path=BindingContext.DeleteCycleCommand, Source={x:Reference cycleList}}"
                                     CommandParameter="{Binding}"
@@ -96,14 +95,13 @@
                                     WidthRequest="32"
                                     Margin="5"
                                 />
-
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-        </VerticalStackLayout>
+        </Grid>
 
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>
