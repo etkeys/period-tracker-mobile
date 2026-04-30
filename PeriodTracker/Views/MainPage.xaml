@@ -20,7 +20,7 @@
             Spacing="25">
 
                 <Label
-                    Text="Days until next period"
+                    Text="Days until your next period"
                     Style="{StaticResource Headline}"
                     SemanticProperties.HeadingLevel="Level1"/>
 
@@ -40,7 +40,7 @@
                         SemanticProperties.HeadingLevel="Level2"/>
 
                     <Label
-                        Text="OVERDUE!"
+                        Text="Your period is overdue!"
                         IsVisible="{Binding IsCycleStartOverdue}"
                         Style="{StaticResource SubHeadline}"
                         TextColor="Crimson"
@@ -64,7 +64,7 @@
 
                     <VerticalStackLayout>
                         <Label
-                            Text="Next period expected to start on:"
+                            Text="Your next period is expected to start on:"
                             IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
                             HorizontalOptions="Start"
                             />
@@ -77,7 +77,7 @@
                     </VerticalStackLayout>
 
                     <Button
-                        Text="Record start of period"
+                        Text="Record start of your period"
                         IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
                         Clicked="OnRecordNewClicked"
                         HorizontalOptions="Fill" />
