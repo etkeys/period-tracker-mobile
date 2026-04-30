@@ -27,8 +27,10 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
 
+        builder.Services.AddSingleton<IDateTimeService, DateTimeService>();
         builder.Services.AddSingleton<IFilePicker>(FilePicker.Default);
         builder.Services.AddSingleton<IFolderPicker>(FolderPicker.Default);
+        builder.Services.AddSingleton<IUpdateServiceProvider, UpdateServiceProvider>();
 
         builder.Services.AddSingleton<IAlertService, AlertService>();
         builder.Services.AddSingleton<AboutPage>();
@@ -43,7 +45,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ImportExportPage>();
         builder.Services.AddTransient<ImportExportViewModel>(sp => new ImportExportViewModel(sp));
         builder.Services.AddTransient<IImportExportService, ImportExportService>();
-        builder.Services.AddTransient<IUpdateService, UpdateService>();
 
         var app = builder.Build();
 

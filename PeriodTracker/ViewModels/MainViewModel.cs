@@ -1,19 +1,35 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.EntityFrameworkCore;
+using PeriodTracker.Services;
 
 namespace PeriodTracker.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IEventBusListener
 {
-    private const int _defaultCycleLengthDays = 28;
+    private const int _defaultCycleLengthDays = 29;
     private bool dataRefreshRequired = true;
-    private readonly IDbContextProvider _dbProvider;
 
-    public MainViewModel(IDbContextProvider dbProvider){
+    private readonly IAlertService _alertService;
+    private readonly IAppInfo _appInfo;
+    private readonly IDbContextProvider _dbContextProvider;
+    private readonly IDateTimeService _dateTimeService;
+    private readonly IUpdateServiceProvider _updateServiceProvider;
+
+    public MainViewModel(
+        IDbContextProvider dbContextProvider,
+        IDateTimeService dateTimeService,
+        IUpdateServiceProvider updateServiceProvider,
+        IAppInfo appInfo,
+        IAlertService alertService) {
+
         EventBus.RegisterListener(this);
 
-        _dbProvider = dbProvider;
+        _alertService = alertService;
+        _appInfo = appInfo;
+        _dbContextProvider = dbContextProvider;
+        _dateTimeService = dateTimeService;
+        _updateServiceProvider = updateServiceProvider;
     }
 
     [ObservableProperty]
@@ -39,7 +55,9 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
             IsCycleStartOverdue = false;
 
-            using var db = await _dbProvider.GetContext();
+            var today = _dateTimeService.Today;
+
+            using var db = await _dbContextProvider.GetContext();
             var mostRecentCycleStart = await
                 (from c in db.Cycles
                 orderby c.StartDate descending
@@ -49,11 +67,11 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
 
             if (mostRecentCycleStart.Equals(default)) return;
 
-            var daysEllapsed = (DateTime.Today - mostRecentCycleStart).Days;
+            var daysEllapsed = (today - mostRecentCycleStart).Days;
             var daysUntilNext = _defaultCycleLengthDays - daysEllapsed;
 
             DaysUntilNextCycleText = daysUntilNext switch {
-                0 when mostRecentCycleStart == DateTime.Today => $"{_defaultCycleLengthDays}",
+                0 when mostRecentCycleStart == today => $"{_defaultCycleLengthDays}",
                 >= 0 => $"{daysUntilNext}",
                 _ => "0"
             };
@@ -72,7 +90,7 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
     }
 
     private async Task CheckForUpdates(){
-        using var updateSvc = ServiceHelper.GetService<IUpdateService>()!;
+        using var updateSvc = _updateServiceProvider.GetUpdateService();
 
         if (!await updateSvc.GetShouldCheckForUpdates()) return;
 
@@ -83,14 +101,13 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
         // TODO need to add logging or something
         if (latestVersion is null) return;
 
-        var currentVersion = ServiceHelper.GetService<IAppInfo>()!.Version;
+        var currentVersion = _appInfo.Version;
 
         if (latestVersion > currentVersion)
-            await ServiceHelper.GetService<IAlertService>()
-                !.ShowAlertAsync(
-                    "Update available",
-                    $"New version {latestVersion:3} is available. For instructions about how to upate, see About > How to update."
-                );
+            await _alertService.ShowAlertAsync(
+                "Update available",
+                $"New version {latestVersion:3} is available. For instructions about how to update, see About > How to update."
+            );
     }
 
 }
