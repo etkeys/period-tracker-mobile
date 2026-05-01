@@ -8,6 +8,7 @@ namespace PeriodTracker.ViewModels;
 public partial class MainViewModel : ViewModelBase, IEventBusListener
 {
     private const int _defaultCycleLengthDays = 29;
+    private const int _defaultPeriodLengthDays = 6;
     private bool dataRefreshRequired = true;
 
     private readonly IAlertService _alertService;
@@ -40,6 +41,11 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
 
     [ObservableProperty]
     private string nextCycleStartDateText = string.Empty;
+
+    [ObservableProperty]
+    private string periodEndDateText = string.Empty;
+    [ObservableProperty]
+    private string periodEndText = string.Empty;
 
     public void HandleEvent(EventBusBroadcastedEvent @event){
         if (@event != EventBusBroadcastedEvent.CyclesUpdated) return;
@@ -81,6 +87,8 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
                 .AddDays(_defaultCycleLengthDays)
                 .ToString("D");
 
+            UpdatePeriodEndText(mostRecentCycleStart);
+
             await CheckForUpdates();
         }
         finally{
@@ -108,6 +116,24 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
                 "Update available",
                 $"New version {latestVersion:3} is available. For instructions about how to update, see About > How to update."
             );
+    }
+
+    private void UpdatePeriodEndText(DateTime cycleStart)
+    {
+        var periodEndDate = cycleStart.AddDays(_defaultPeriodLengthDays);
+        var daysRemaining = (cycleStart == default)
+            ? -1
+            : _defaultPeriodLengthDays - (_dateTimeService.Today - cycleStart).Days;
+
+        PeriodEndDateText = daysRemaining > 0 ? periodEndDate.ToString("D") : string.Empty;
+        PeriodEndText = daysRemaining switch
+        {
+            // > 0 => $"The last day of your period should be {periodEndDate:D} (in {daysRemaining} days).",
+            > 1 => $"Last day of your period should be in {daysRemaining} days:",
+            1 => $"Last day of your period should be in {daysRemaining} day:",
+            0 => "Today should be the last day of your period.",
+            _ => string.Empty
+        };
     }
 
 }
