@@ -94,7 +94,7 @@ public class MainViewModelTests: BaseTest, IClassFixture<TemporaryDirectoryFixtu
     [Theory]
     [InlineData("2026-04-16", "2026-04-16", "2026-04-22", "Last day of your period should be in 6 days:")]
     [InlineData("2026-04-16", "2026-04-17", "2026-04-22", "Last day of your period should be in 5 days:")]
-    [InlineData("2026-04-16", "2026-04-21", "2026-04-22", "Last day of your period should be in 1 day:")]
+    [InlineData("2026-04-16", "2026-04-21", "2026-04-22", "Tomorrow should be the last day of your period.")]
     [InlineData("2026-04-16", "2026-04-22", "", "Today should be the last day of your period.")]
     [InlineData("2026-04-16", "2026-04-23", "", "")]
     public async Task LoadAsync_CalculatePeriodEndCorrectly(

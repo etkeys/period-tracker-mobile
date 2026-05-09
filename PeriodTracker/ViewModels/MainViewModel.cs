@@ -180,12 +180,12 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             ? -1
             : _defaultPeriodLengthDays - (_dateTimeService.Today - cycleStart).Days;
 
-        PeriodEndDateText = daysRemaining > 0 ? periodEndDate.ToString("D") : string.Empty;
+        PeriodEndDateText = daysRemaining > 1 ? periodEndDate.ToString("D") : string.Empty;
         PeriodEndText = daysRemaining switch
         {
             // > 0 => $"The last day of your period should be {periodEndDate:D} (in {daysRemaining} days).",
             > 1 => $"Last day of your period should be in {daysRemaining} days:",
-            1 => $"Last day of your period should be in {daysRemaining} day:",
+            1 => $"Tomorrow should be the last day of your period.",
             0 => "Today should be the last day of your period.",
             _ => string.Empty
         };
