@@ -40,6 +40,11 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
     private bool isCycleStartOverdue;
 
     [ObservableProperty]
+    private string fertileWindowDateText = string.Empty;
+    [ObservableProperty]
+    private string fertileWindowText = string.Empty;
+
+    [ObservableProperty]
     private string nextCycleStartDateText = string.Empty;
 
     [ObservableProperty]
@@ -87,6 +92,7 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
                 .AddDays(_defaultCycleLengthDays)
                 .ToString("D");
 
+            UpdateFertileWindowText(mostRecentCycleStart);
             UpdatePeriodEndText(mostRecentCycleStart);
 
             await CheckForUpdates();
@@ -118,6 +124,55 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             );
     }
 
+    private void UpdateFertileWindowText(DateTime cycleStart)
+    {
+        FertileWindowText = string.Empty;
+        FertileWindowDateText = string.Empty;
+
+        if (cycleStart == default)
+            return;
+
+        // Fertile window is considered to be the 3 days leading up to ovulation,
+        // the day of ovulation (which occurs around 14-15 days after the current
+        // cycle starts), and the day after ovulation.
+        // NOTE: Without tracking ovulation more precisely, this is just an
+        // estimate based on the average cycle length and ovulation timing.
+        // NOTE: Ovulation day can also be calculated by halving the cycle length.
+        // This is probably the way to go to allow for different cycle lengths.
+
+        var ovulationDay = cycleStart.AddDays(Math.Floor(_defaultCycleLengthDays / 2.0));
+
+        var fertileWindowStart = ovulationDay.AddDays(-3);
+        var fertileWindowEnd = ovulationDay.AddDays(1);
+
+        var today = _dateTimeService.Today;
+        if (today > fertileWindowEnd)
+            return;
+        else if (today == fertileWindowEnd)
+        {
+            FertileWindowText = "Today should be the last day with the highest chance for pregnancy.";
+        }
+        else if (today == fertileWindowEnd.AddDays(-1))
+        {
+            FertileWindowText = "Tomorrow should be the last day with the highest chances for pregnancy.";
+            FertileWindowDateText = $"Ends:{Environment.NewLine}{fertileWindowEnd:D}";
+        }
+        else if (today >= fertileWindowStart)
+        {
+            var daysRemaining = (fertileWindowEnd - today).Days;
+            FertileWindowText = $"Highest chances for pregnancy should be ending soon. Last day should be in {daysRemaining} days.";
+            FertileWindowDateText = $"Ends:{Environment.NewLine}{fertileWindowEnd:D}";
+        }
+        else
+        {
+            var daysUntil = (fertileWindowStart - today).Days;
+            var dayText = daysUntil > 1 ? "days" : "day";
+            FertileWindowText = $"Highest chances for pregnancy should start in {daysUntil} {dayText}.";
+            FertileWindowDateText = $"{fertileWindowStart:D}{Environment.NewLine}      thru{Environment.NewLine}{fertileWindowEnd:D}";
+        }
+
+    }
+
     private void UpdatePeriodEndText(DateTime cycleStart)
     {
         var periodEndDate = cycleStart.AddDays(_defaultPeriodLengthDays);
@@ -125,12 +180,12 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             ? -1
             : _defaultPeriodLengthDays - (_dateTimeService.Today - cycleStart).Days;
 
-        PeriodEndDateText = daysRemaining > 0 ? periodEndDate.ToString("D") : string.Empty;
+        PeriodEndDateText = daysRemaining > 1 ? periodEndDate.ToString("D") : string.Empty;
         PeriodEndText = daysRemaining switch
         {
             // > 0 => $"The last day of your period should be {periodEndDate:D} (in {daysRemaining} days).",
             > 1 => $"Last day of your period should be in {daysRemaining} days:",
-            1 => $"Last day of your period should be in {daysRemaining} day:",
+            1 => $"Tomorrow should be the last day of your period.",
             0 => "Today should be the last day of your period.",
             _ => string.Empty
         };
