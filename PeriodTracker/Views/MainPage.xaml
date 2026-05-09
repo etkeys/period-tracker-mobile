@@ -51,13 +51,28 @@
                         >
                         <Label
                             Text="{Binding PeriodEndText}"
-                            IsVisible="{Binding PeriodEndText, Converter={StaticResource StringNotNullOrEmptyToBoolConverter}}"
                             HorizontalOptions="Start"
                             />
                         <Label
                             Text="{Binding PeriodEndDateText}"
                             IsVisible="{Binding PeriodEndText, Converter={StaticResource StringNotNullOrEmptyToBoolConverter}}"
                             HorizontalOptions="End"
+                            Margin="0,0,10,0"
+                            />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        IsVisible="{Binding FertileWindowText, Converter={StaticResource StringNotNullOrEmptyToBoolConverter}}"
+                        >
+                        <Label
+                            Text="{Binding FertileWindowText}"
+                            HorizontalOptions="Start"
+                            />
+                        <Label
+                            Text="{Binding FertileWindowDateText}"
+                            IsVisible="{Binding FertileWindowText, Converter={StaticResource StringNotNullOrEmptyToBoolConverter}}"
+                            HorizontalOptions="End"
+                            TextAlignment="End"
                             Margin="0,0,10,0"
                             />
                     </VerticalStackLayout>

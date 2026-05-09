@@ -34,6 +34,64 @@ public class MainViewModelTests: BaseTest, IClassFixture<TemporaryDirectoryFixtu
     }
 
     [Theory]
+    [InlineData("2026-04-16", "2026-04-16", "2026-04-27", "2026-05-01", "Highest chances for pregnancy should start in 11 days.", "{start}{NL}      thru{NL}{end}")]
+    [InlineData("2026-04-16", "2026-04-26", "2026-04-27", "2026-05-01", "Highest chances for pregnancy should start in 1 day.", "{start}{NL}      thru{NL}{end}")]
+    [InlineData("2026-04-16", "2026-04-27", "", "2026-05-01", "Highest chances for pregnancy should be ending soon. Last day should be in 4 days.", "Ends:{NL}{end}")]
+    [InlineData("2026-04-16", "2026-04-30", "", "2026-05-01", "Tomorrow should be the last day with the highest chances for pregnancy.", "Ends:{NL}{end}")]
+    [InlineData("2026-04-16", "2026-05-01", "", "", "Today should be the last day with the highest chance for pregnancy.", "")]
+    [InlineData("2026-04-16", "2026-05-02", "", "", "", "")]
+    public async Task LoadAsync_CalculateFertialeWindowCorrectly(
+        string inpMostRecentCycleStartStr,
+        string inpTodayStr,
+        string expFertileWindowDateStartText,
+        string expFertileWindowDateEndText,
+        string expFertileWindowText,
+        string expFertileWindowDateTextTemplate
+    )
+    {
+        var today = DateTime.Parse(inpTodayStr);
+
+        var testTempDir = _tempDir.CreateTestCaseDirectory(inpTodayStr);
+        var seedData = new SeedData {
+            Cycles = new List<Cycle> {
+                new Cycle { StartDate = DateTime.Parse(inpMostRecentCycleStartStr) }
+            }
+        };
+        await SetupDatabase(testTempDir, seedData);
+
+        SetupMocks(testTempDir, today);
+
+        _mockUpdateService.Setup(s => s.GetShouldCheckForUpdates())
+            .ReturnsAsync(false);
+
+        var actor = new MainViewModel(
+            _mockDbContextProvider.Object,
+            _mockDateTimeService.Object,
+            _mockUpdateServiceProvider.Object,
+            _mockAppInfo.Object,
+            _mockAlertService.Object);
+
+        await actor.LoadAsync();
+
+        expFertileWindowDateStartText = string.IsNullOrEmpty(expFertileWindowDateStartText)
+            ? string.Empty
+            : DateTime.Parse(expFertileWindowDateStartText).ToString("D");
+
+        expFertileWindowDateEndText = string.IsNullOrEmpty(expFertileWindowDateEndText)
+            ? string.Empty
+            : DateTime.Parse(expFertileWindowDateEndText).ToString("D");
+
+        var expFertileWindowDateText = expFertileWindowDateTextTemplate
+            .Replace("{start}", expFertileWindowDateStartText)
+            .Replace("{end}", expFertileWindowDateEndText)
+            .Replace("{NL}", Environment.NewLine);
+
+
+        Assert.Equal(expFertileWindowText, actor.FertileWindowText);
+        Assert.Equal(expFertileWindowDateText, actor.FertileWindowDateText);
+    }
+
+    [Theory]
     [InlineData("2026-04-16", "2026-04-16", "2026-04-22", "Last day of your period should be in 6 days:")]
     [InlineData("2026-04-16", "2026-04-17", "2026-04-22", "Last day of your period should be in 5 days:")]
     [InlineData("2026-04-16", "2026-04-21", "2026-04-22", "Last day of your period should be in 1 day:")]
