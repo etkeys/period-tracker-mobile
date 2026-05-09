@@ -72,7 +72,6 @@
                             Text="{Binding FertileWindowDateText}"
                             IsVisible="{Binding FertileWindowText, Converter={StaticResource StringNotNullOrEmptyToBoolConverter}}"
                             HorizontalOptions="End"
-                            TextAlignment="End"
                             Margin="0,0,10,0"
                             />
                     </VerticalStackLayout>
