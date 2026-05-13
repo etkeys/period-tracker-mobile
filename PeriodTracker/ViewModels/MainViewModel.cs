@@ -46,6 +46,8 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
 
     [ObservableProperty]
     private string nextCycleStartDateText = string.Empty;
+    [ObservableProperty]
+    private string nextCycleStartText = string.Empty;
 
     [ObservableProperty]
     private string periodEndDateText = string.Empty;
@@ -66,8 +68,6 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
             IsBusy = true;
             IsCycleStartOverdue = false;
 
-            var today = _dateTimeService.Today;
-
             using var db = await _dbContextProvider.GetContext();
             var mostRecentCycleStart = await
                 (from c in db.Cycles
@@ -78,22 +78,9 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
 
             if (mostRecentCycleStart.Equals(default)) return;
 
-            var daysEllapsed = (today - mostRecentCycleStart).Days;
-            var daysUntilNext = _defaultCycleLengthDays - daysEllapsed;
-
-            DaysUntilNextCycleText = daysUntilNext switch {
-                0 when mostRecentCycleStart == today => $"{_defaultCycleLengthDays}",
-                >= 0 => $"{daysUntilNext}",
-                _ => "0"
-            };
-
-            IsCycleStartOverdue = daysUntilNext < 0;
-            NextCycleStartDateText = mostRecentCycleStart
-                .AddDays(_defaultCycleLengthDays)
-                .ToString("D");
-
-            UpdateFertileWindowText(mostRecentCycleStart);
             UpdatePeriodEndText(mostRecentCycleStart);
+            UpdateFertileWindowText(mostRecentCycleStart);
+            UpdateNextPeriodStartText(mostRecentCycleStart);
 
             await CheckForUpdates();
         }
@@ -183,7 +170,6 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
         PeriodEndDateText = daysRemaining > 1 ? periodEndDate.ToString("D") : string.Empty;
         PeriodEndText = daysRemaining switch
         {
-            // > 0 => $"The last day of your period should be {periodEndDate:D} (in {daysRemaining} days).",
             > 1 => $"Last day of your period should be in {daysRemaining} days:",
             1 => $"Tomorrow should be the last day of your period.",
             0 => "Today should be the last day of your period.",
@@ -191,4 +177,33 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
         };
     }
 
+    private void UpdateNextPeriodStartText(DateTime cycleStart)
+    {
+        var today = _dateTimeService.Today;
+        var daysEllapsed = (today - cycleStart).Days;
+        var daysUntilNext = _defaultCycleLengthDays - daysEllapsed;
+
+        DaysUntilNextCycleText = daysUntilNext switch {
+            0 when cycleStart == today => $"{_defaultCycleLengthDays}",
+            >= 0 => $"{daysUntilNext}",
+            _ => "0"
+        };
+
+        IsCycleStartOverdue = daysUntilNext < 0;
+
+        NextCycleStartText = daysUntilNext switch
+        {
+            > 1 => $"Your next period should start on:",
+            1 => $"Your next period should start tomorrow.",
+            0 => $"Your next period should start today.",
+            -1 => $"Your next period should have started yesterday.",
+            < -1 => $"Your next period should have started {-daysUntilNext} days ago."
+        };
+        NextCycleStartDateText = daysUntilNext switch
+        {
+            var d when d > 1 || d < -1 =>
+                cycleStart.AddDays(_defaultCycleLengthDays).ToString("D"),
+            _ => string.Empty
+        };
+    }
 }
