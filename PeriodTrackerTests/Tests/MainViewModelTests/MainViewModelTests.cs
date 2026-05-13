@@ -136,17 +136,20 @@ public class MainViewModelTests: BaseTest, IClassFixture<TemporaryDirectoryFixtu
     }
 
     [Theory]
-    [InlineData("2026-04-16", "2026-04-16", "29", false)]
-    [InlineData("2026-04-16", "2026-04-29", "16", false)]
-    [InlineData("2026-04-16", "2026-05-13", "2", false)]
-    [InlineData("2026-04-16", "2026-05-14", "1", false)]
-    [InlineData("2026-04-16", "2026-05-15", "0", false)]
-    [InlineData("2026-04-16", "2026-05-20", "0", true)]
+    [InlineData("2026-04-16", "2026-04-16", "29", false, "2026-05-15", "Your next period should start on:")]
+    [InlineData("2026-04-16", "2026-04-29", "16", false, "2026-05-15", "Your next period should start on:")]
+    [InlineData("2026-04-16", "2026-05-13", "2", false, "2026-05-15", "Your next period should start on:")]
+    [InlineData("2026-04-16", "2026-05-14", "1", false, "", "Your next period should start tomorrow.")]
+    [InlineData("2026-04-16", "2026-05-15", "0", false, "", "Your next period should start today.")]
+    [InlineData("2026-04-16", "2026-05-16", "0", true, "", "Your next period should have started yesterday.")]
+    [InlineData("2026-04-16", "2026-05-20", "0", true, "2026-05-15", "Your next period should have started 5 days ago.")]
     public async Task LoadAsync_CalculatesDaysUntilNextCycleCorrectly(
         string inpMostRecentCycleStartStr,
         string inpTodayStr,
         string expDaysUntilNextCycleText,
-        bool expIsCycleStartOverdue)
+        bool expIsCycleStartOverdue,
+        string expNextCycleStartDateText,
+        string expNextCycleStartText)
     {
         var today = DateTime.Parse(inpTodayStr);
         var mockDateTimeService = new Mock<IDateTimeService>();
@@ -182,7 +185,13 @@ public class MainViewModelTests: BaseTest, IClassFixture<TemporaryDirectoryFixtu
 
         await actor.LoadAsync();
 
+        expNextCycleStartDateText = string.IsNullOrEmpty(expNextCycleStartDateText)
+            ? string.Empty
+            : DateTime.Parse(expNextCycleStartDateText).ToString("D");
+
         Assert.Equal(expDaysUntilNextCycleText, actor.DaysUntilNextCycleText);
         Assert.Equal(expIsCycleStartOverdue, actor.IsCycleStartOverdue);
+        Assert.Equal(expNextCycleStartDateText, actor.NextCycleStartDateText);
+        Assert.Equal(expNextCycleStartText, actor.NextCycleStartText);
     }
 }
