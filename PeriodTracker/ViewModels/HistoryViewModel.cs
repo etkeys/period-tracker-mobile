@@ -31,7 +31,7 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
 
         if (!confirmDelete) return;
 
-        var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
+        var delayTask = App.Delay();
         try{
             IsBusy = true;
 
@@ -60,7 +60,7 @@ public class HistoryViewModel : ViewModelBase, IEventBusListener
     public async Task LoadAsync(){
         if (!dataRefreshRequired) return;
 
-        var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
+        var delayTask = App.Delay();
         try{
             IsBusy = true;
 
