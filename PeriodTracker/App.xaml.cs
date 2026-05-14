@@ -5,9 +5,14 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
+    }
 
-		MainPage = new AppShell();
-	}
+    public static Page AppMainPage => Current?.Windows?[0]?.Page!;
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new AppShell());
+    }
 
     /// <summary>
     /// This is used to create a delay that can be awaited without blocking the
