@@ -63,7 +63,7 @@ public partial class MainViewModel : ViewModelBase, IEventBusListener
     public async Task LoadAsync(){
         if (!dataRefreshRequired) return;
 
-        var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
+        var delayTask = App.Delay();
         try{
             IsBusy = true;
             IsCycleStartOverdue = false;

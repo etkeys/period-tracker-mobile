@@ -30,7 +30,7 @@ public partial class CycleEditViewModel : ViewModelBase
     private DateTime selectedStartDate = DateTime.Today;
 
     public async Task<bool> Save() {
-        var delayTask = Task.Delay(TimeSpan.FromSeconds(2));
+        var delayTask = App.Delay();
 
         try{
             IsBusy = true;
