@@ -19,7 +19,7 @@ public partial class AppDbContextTests
             object value = prop switch {
                 AppStateProperty.NotifyUpdateAvailableInterval => await db.GetAppStateValue(prop, Convert.ToInt32),
                 AppStateProperty.NotifyUpdateAvailableNextDate => await db.GetAppStateValue(prop, Convert.ToDateTime),
-                _ => throw new NotImplementedException($"App state property '{prop}' not handled.")
+                _ => throw new NotImplementedException($"App state property '{prop}' not expected.")
             };
         }
 

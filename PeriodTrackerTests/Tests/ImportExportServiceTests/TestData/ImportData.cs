@@ -413,7 +413,7 @@ public partial class ImportExportServiceTests
             public Exception? Exception {get; init;} = null;
         }
 
-        public class Inputs
+        public class Inputs: ISeedDataProvider
         {
             public required Version AppVersion {get; init;}
             public required string Payload {get; init;}

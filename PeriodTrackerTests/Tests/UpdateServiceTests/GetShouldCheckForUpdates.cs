@@ -1,4 +1,3 @@
-
 using Moq;
 using PeriodTracker;
 
@@ -7,11 +6,11 @@ namespace PeriodTrackerTests;
 public partial class UpdateServiceTests
 {
 
-    [Theory, MemberData(nameof(GetShouldCheckForUpdatesTestsData))]
-    public async Task GetShouldCheckForUpdatesTests(TestCase test){
+    [Theory, ClassData(typeof(GetShouldCheckForUpdatesTestsData))]
+    public async Task GetShouldCheckForUpdatesTests(TestCase<GetShouldCheckForUpdatesTestsData.TestParameters> test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
-        await SetupDatabase(testTempDir, test.Setups);
+        await SetupDatabase(testTempDir, test.Parameters.Inputs);
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
@@ -21,32 +20,65 @@ public partial class UpdateServiceTests
         using var actor = new UpdateService(_httpClientFactoryMock.Object, _dbContextProviderMock.Object);
 
         var act = await actor.GetShouldCheckForUpdates();
-        var exp = (bool)test.Expected["result"]!;
+        var exp = test.Parameters.Expected.Result;
 
         Assert.Equal(exp, act);
     }
 
-    public static IEnumerable<object[]> GetShouldCheckForUpdatesTestsData => BundleTestCases(
-        new TestCase("Time has elapsed")
-            // No setup because the database default is enough.
-            .WithExpected("result", true),
+    public class GetShouldCheckForUpdatesTestsData: IEnumerable<object[]>
+    {
+        public record TestParameters(Inputs Inputs, ExpectedResults Expected);
+        private static IEnumerable<object[]> TestCases()
+        {
+            yield return new []{
+                new TestCase<TestParameters>("Time has elapsed",
+                    new TestParameters(
+                        // No setup because the database default is enough.
+                        new Inputs(),
+                        new ExpectedResults{ Result = true }
+                    ))};
 
-        new TestCase("Time has elapsed - is today")
-            .WithSetup(
-                "database",
-                new Dictionary<string, object[]>{
-                    {"AppState", new object[]{
-                        new object[] {AppStateProperty.NotifyUpdateAvailableNextDate, DateTime.UtcNow.Date},}
-                }})
-            .WithExpected("result", true),
+            yield return new []{
+                new TestCase<TestParameters>("Time has elapsed - is today",
+                    new TestParameters(
+                        new Inputs{
+                            AppStates = new List<AppState>{
+                                new (){
+                                    AppStatePropertyId = AppStateProperty.NotifyUpdateAvailableNextDate,
+                                    Value = DateTime.UtcNow.Date.ToString()
+                                }}},
+                        new ExpectedResults{ Result = true }
+                    ))};
 
-        new TestCase("Time has not elapsed")
-            .WithSetup(
-                "database",
-                new Dictionary<string, object[]>{
-                    {"AppState", new object[]{
-                        new object[] {AppStateProperty.NotifyUpdateAvailableNextDate, DateTime.UtcNow.AddDays(1)},}
-                }})
-            .WithExpected("result", false)
-        );
+            yield return new []{
+                new TestCase<TestParameters>("Time has not elapsed",
+                    new TestParameters(
+                        new Inputs{
+                            AppStates = new List<AppState>{
+                                new (){
+                                    AppStatePropertyId = AppStateProperty.NotifyUpdateAvailableNextDate,
+                                    Value = DateTime.UtcNow.AddDays(1).ToString()
+                                }}},
+                        new ExpectedResults{ Result = false }
+                    ))};
+        }
+
+        public IEnumerator<object[]> GetEnumerator() => TestCases().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public class ExpectedResults
+        {
+            public bool Result { get; init; }
+        }
+
+        public class Inputs: ISeedDataProvider
+        {
+            public List<AppState> AppStates { get; init; } = new ();
+
+            public SeedData GetSeedData() => new SeedData{
+                AppStates = AppStates
+            };
+        }
+    }
 }

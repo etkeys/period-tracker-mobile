@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PeriodTracker;
 
 namespace PeriodTrackerTests;
@@ -5,108 +6,138 @@ namespace PeriodTrackerTests;
 public partial class AppDbContextTests
 {
 
-    [Theory, MemberData(nameof(AddCycleTestsData))]
-    public async Task AddCycleTests(TestCase test){
+    [Theory, ClassData(typeof(AddCycleTestsData))]
+    public async Task AddCycleTests(TestCase<AddCycleTestsData.TestParameters> test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
-        var inp = ((Cycle[]?)test.Inputs["cycles"])!;
+        var inp = test.Parameters.Inputs.Cycles;
 
-        var actInsertedResults = new bool[inp.Length];
-        for(var i =0; i < inp.Length; i++)
+        var actInsertedResults = new bool[inp.Count];
+        for(var i =0; i < inp.Count; i++)
             actInsertedResults[i] = await db.AddCycle(inp[i]);
 
-        var actInserted = (from c in db.Cycles select c).ToArray();
+        var actInserted = await (from c in db.Cycles select c).ToListAsync();
 
-        var expInserted = (Cycle[]?)test.Expected["cycles"];
-        var expInsertedResults = (bool[]?)test.Expected["insert results"];
+        var expInserted = test.Parameters.Expected.Cycles;
+        var expInsertedResults = test.Parameters.Expected.InsertResults;
 
         Assert.Equal(expInsertedResults, actInsertedResults);
         AssertCycles(expInserted, actInserted);
     }
 
-    public static IEnumerable<object[]> AddCycleTestsData =>
-        new []{
-            new TestCase("Add single")
-            .WithInput("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        }})
-            .WithExpected("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        }})
-            .WithExpected("insert results", new[]{true}),
+    public class AddCycleTestsData: IEnumerable<object[]>
+    {
+        public record TestParameters(Inputs Inputs, ExpectedResults Expected);
+        public static IEnumerable<object[]> TestCases()
+        {
+            yield return new[] {
+                new TestCase<TestParameters>("Add single",
+                new TestParameters(
+                    new Inputs{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }}},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }},
+                        InsertResults = new List<bool>{true}
+                    }))};
 
-            new TestCase("Add many")
-            .WithInput("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        },
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-12-01")
-                    }
-                        })
-            .WithExpected("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        },
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-12-01")
-                    }
-                        })
-            .WithExpected("insert results", new[]{true, true}),
+            yield return new[] {
+                new TestCase<TestParameters>("Add many",
+                new TestParameters(
+                    new Inputs{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            },
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }}},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            },
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }},
+                        InsertResults = new List<bool>{true, true}
+                    }))};
 
-            new TestCase("Add many - inverted")
-            .WithInput("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-12-01")
-                        },
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        }
-                    })
-            .WithExpected("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        },
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-12-01")
-                    }
-                        })
-            .WithExpected("insert results", new[]{true, true}),
+            yield return new[] {
+                new TestCase<TestParameters>("Add many - inverted",
+                new TestParameters(
+                    new Inputs{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            },
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }}},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            },
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }},
+                        InsertResults = new List<bool>{true, true}
+                    }))};
 
-            new TestCase("Add many with same date")
-            .WithInput("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        },
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01")
-                    }
-                        })
-            .WithExpected("cycles", new []{
-                    new Cycle{
-                        RecordedDate = DateTime.Today,
-                        StartDate = DateTime.Parse("2023-11-01"),
-                        },
-                        })
-            .WithExpected("insert results", new[]{true, false}),
-
+            yield return new[] {
+                new TestCase<TestParameters>("Add many with same date",
+                new TestParameters(
+                    new Inputs{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            },
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }}},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }},
+                        InsertResults = new List<bool>{true, false}
+                    }))};
         }
-        .Select(tc => new object[] {tc});
 
+        public IEnumerator<object[]> GetEnumerator() => TestCases().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public class ExpectedResults
+        {
+            public List<bool> InsertResults {get; init;} = new();
+            public List<Cycle> Cycles {get; init;} = new();
+        }
+
+        public class Inputs
+        {
+            public List<Cycle> Cycles {get; init;} = new();
+        }
+    }
 }
