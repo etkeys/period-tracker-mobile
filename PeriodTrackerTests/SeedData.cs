@@ -3,7 +3,15 @@ using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
-public class SeedData
+public interface ISeedDataProvider
 {
-    public required List<Cycle> Cycles {get; init;} = new();
+    SeedData GetSeedData();
+}
+
+public class SeedData: ISeedDataProvider
+{
+    public List<AppState> AppStates {get; init;} = new();
+    public List<Cycle> Cycles {get; init;} = new();
+
+    public SeedData GetSeedData() => this;
 }

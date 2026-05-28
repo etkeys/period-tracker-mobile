@@ -5,4 +5,5 @@ publish/
 PeriodTracker/commit_hash.txt
 PeriodTracker.keystore
 **/*.user
+**/*.csproj.lscache
 

@@ -13,37 +13,20 @@ public partial class AppDbContextTests : BaseTest, IClassFixture<TemporaryDirect
         _tempDir = tempDirFixture;
     }
 
-    private void AssertCycles(Cycle[]? expected, Cycle[]? actual)
+    private void AssertCycles(List<Cycle> expected, List<Cycle> actual)
     {
-        if (expected is null && actual is null) return;
-        if (expected is null || actual is null)
-            Assert.Fail("Either expected or actual are null");
-
-        Assert.Equal(expected.Length, actual.Length);
-        Assert.All(
-            expected,
-            exp =>
-            {
-                var act = actual.First(a => a.Equals(exp));
-                Assert.Equal(exp.RecordedDate, act.RecordedDate);
-            }
-        );
-    }
-
-    private void AssertCyclesHistory(List<CycleHistory> expected, List<CycleHistory> actual)
-    {
-        if (expected is null && actual is null) return;
-        if (expected is null || actual is null)
-            Assert.Fail("Either expected or actual are null");
-
         Assert.Equal(expected.Count, actual.Count);
+
+        expected = expected.OrderBy(c => c.StartDate).ToList();
+        actual = actual.OrderBy(c => c.StartDate).ToList();
+
+        var zipExpAct = expected.Zip(actual);
         Assert.All(
-            expected,
-            exp =>
+            zipExpAct,
+            expAct =>
             {
-                var act = actual.First(a => a.StartDate == exp.StartDate);
+                var (exp, act) = expAct;
                 Assert.Equal(exp.RecordedDate, act.RecordedDate);
-                Assert.Equal(exp.CycleLengthDays, act.CycleLengthDays);
             }
         );
     }

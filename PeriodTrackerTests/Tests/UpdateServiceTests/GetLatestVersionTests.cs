@@ -8,92 +8,136 @@ namespace PeriodTrackerTests;
 public partial class UpdateServiceTests
 {
 
-    [Theory, MemberData(nameof(GetLatestVersionTestsData))]
-    public async Task GetLatestVersionTests(TestCase test){
+    [Theory, ClassData(typeof(GetLatestVersionTestsData))]
+    public async Task GetLatestVersionTests(TestCase<GetLatestVersionTestsData.TestParameters> test){
 
-        SetupHttpClientFactoryMock(test.Setups["httpclientfactory"]!);
+        SetupHttpClientFactoryMock(test.Parameters.Inputs.HttpResponseMessage);
 
         using var actor = new UpdateService(_httpClientFactoryMock.Object, _dbContextProviderMock.Object);
         var actVersion = await actor.GetLatestVersion();
 
-        var expVersion = (Version?)test.Expected["version"];
+        var expVersion = test.Parameters.Expected.Version;
 
         Assert.Equal(expVersion, actVersion);
     }
 
-    private void SetupHttpClientFactoryMock(object httpClientFactorySetup){
-        var setupData = (httpClientFactorySetup as Dictionary<string, object>)!;
-
+    private void SetupHttpClientFactoryMock(HttpResponseMessage setupResponseMessage){
         // ref: https://stackoverflow.com/a/44028625
         var mh = new Mock<HttpMessageHandler>();
         mh.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage{
-                StatusCode = (HttpStatusCode)setupData["status code"],
-                Content = (StringContent)setupData["content"]
-            });
+            .ReturnsAsync(setupResponseMessage);
 
-        _httpClientFactoryMock.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(new HttpClient(mh.Object));
+        _httpClientFactoryMock.Setup(m =>
+            m.CreateClient(It.IsAny<string>())).Returns(new HttpClient(mh.Object));
     }
 
-    public static IEnumerable<object[]> GetLatestVersionTestsData => BundleTestCases(
-        new TestCase("200 with correct data")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.OK},
-                    {"content", new StringContent(_json_200_with_correct_data)}
-                })
-            .WithExpected("version", new Version("0.1.0"))
+    public class GetLatestVersionTestsData: IEnumerable<object[]>
+    {
+        public record TestParameters(Inputs Inputs, ExpectedResults Expected);
 
-        ,new TestCase("200 but no json")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.OK},
-                    {"content", new StringContent(string.Empty)}
-                })
-            .WithExpected("version", null)
+        private static IEnumerable<object[]> TestCases()
+        {
+            yield return new []{
+                new TestCase<TestParameters>("200 with correct data",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new StringContent(_json_200_with_correct_data)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = new Version("0.1.0")
+                    }
+                ))};
 
-        ,new TestCase("200 but tag_name is not present")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.OK},
-                    {"content", new StringContent(_json_200_without_tag_name)}
-                })
-            .WithExpected("version", null)
+            yield return new []{
+                new TestCase<TestParameters>("200 but no json",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new StringContent(string.Empty)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = null
+                    }
+                ))};
 
-        ,new TestCase("200 but tag_name is a version string")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.OK},
-                    {"content", new StringContent(_json_200_tag_name_is_not_version)}
-                })
-            .WithExpected("version", null)
+            yield return new []{
+                 new TestCase<TestParameters>("200 but tag_name is not present",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new StringContent(_json_200_without_tag_name)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = null
+                    }
+                ))};
 
-        ,new TestCase("400")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.BadRequest},
-                    {"content", new StringContent(string.Empty)}
-                })
-            .WithExpected("version", null)
+            yield return new []{
+                 new TestCase<TestParameters>("200 but tag_name is not a version string",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new StringContent(_json_200_tag_name_is_not_version)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = null
+                    }
+                ))};
 
-        ,new TestCase("404")
-            .WithSetup(
-                "httpclientfactory",
-                new Dictionary<string, object>{
-                    {"status code", HttpStatusCode.NotFound},
-                    {"content", new StringContent(string.Empty)}
-                })
-            .WithExpected("version", null)
+             yield return new []{
+                 new TestCase<TestParameters>("400",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.BadRequest,
+                            Content = new StringContent(string.Empty)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = null
+                    }
+                ))};
 
-        // timeout
+             yield return new []{
+                 new TestCase<TestParameters>("404",
+                new TestParameters(
+                    new Inputs{
+                        HttpResponseMessage = new HttpResponseMessage{
+                            StatusCode = HttpStatusCode.NotFound,
+                            Content = new StringContent(string.Empty)
+                        }
+                    },
+                    new ExpectedResults{
+                        Version = null
+                    }
+                ))};
 
-        );
+        }
+
+        public IEnumerator<object[]> GetEnumerator() => TestCases().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public class ExpectedResults
+        {
+            public Version? Version {get; init;}
+        }
+
+        public class Inputs
+        {
+            public required HttpResponseMessage HttpResponseMessage {get; init;}
+        }
+
+    }
 
     private const string _json_200_tag_name_is_not_version = @"
     {

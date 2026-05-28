@@ -1,98 +1,130 @@
-﻿using PeriodTracker;
+﻿using Microsoft.EntityFrameworkCore;
+using PeriodTracker;
 
 namespace PeriodTrackerTests;
 
 public partial class AppDbContextTests
 {
 
-    [Theory, MemberData(nameof(DeleteCycleTestsData))]
-    public async Task DeleteCycleTests(TestCase test){
+    [Theory, ClassData(typeof(DeleteCycleTestsData))]
+    public async Task DeleteCycleTests(TestCase<DeleteCycleTestsData.TestParameters> test){
         var testTempDir = _tempDir.CreateTestCaseDirectory(test.Name);
 
-        await SetupDatabase(testTempDir, test.Setups);
+        await SetupDatabase(testTempDir, test.Parameters.Inputs);
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
-        var toDelete = ((Cycle?)test.Inputs["cycle"])!;
+        var toDelete = test.Parameters.Inputs.Cycle;
 
         var actDeleteResult = await db.DeleteCycle(toDelete);
-        var actCycles = (from c in db.Cycles select c).ToArray();
+        var actCycles = await (from c in db.Cycles select c).ToListAsync();
 
-        var expCycles = (Cycle[]?)test.Expected["cycles"];
-        var expDeleteResult = (bool?)test.Expected["delete result"];
+        var expCycles = test.Parameters.Expected.Cycles;
+        var expDeleteResult = test.Parameters.Expected.DeleteResult;
 
         Assert.Equal(expDeleteResult, actDeleteResult);
         AssertCycles(expCycles, actCycles);
     }
 
-    public static IEnumerable<object[]> DeleteCycleTestsData =>
-        new []{
-            new TestCase("Target exists")
-            .WithSetup(
-                "database",
-                new Dictionary<string, object[]>{
-                    {"Cycle", new[]{
-                        new Cycle{
-                            RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-11-01"),
-                            },
-                        new Cycle{
+    public class DeleteCycleTestsData: IEnumerable<object[]>
+    {
+        public record TestParameters(Inputs Inputs, ExpectedResults Expected);
+
+        public static IEnumerable<object[]> TestCases()
+        {
+            yield return new object[]{
+                new TestCase<TestParameters>("Target exists",
+                new TestParameters(
+                    new Inputs{
+                        Cycle = new Cycle {
                             RecordedDate = DateTime.Today,
                             StartDate = DateTime.Parse("2023-12-01")
-                        }
-                    }},
-                })
-            .WithInput("cycle", new Cycle {
-                RecordedDate = DateTime.Today,
-                StartDate = DateTime.Parse("2023-12-01")
-            })
-            .WithExpected("cycles", new[]{
-                        new Cycle{
-                            RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-11-01"),
+                        },
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
                             },
-            })
-            .WithExpected("delete result", true),
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }
+                        }},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
+                            }},
+                        DeleteResult = true
+                    }))};
 
-            new TestCase("Target does not exist")
-            .WithSetup(
-                "database",
-                new Dictionary<string, object[]>{
-                    {"Cycle", new[]{
-                        new Cycle{
+            yield return new object[]{
+                new TestCase<TestParameters>("Target does not exist",
+                new TestParameters(
+                    new Inputs{
+                        Cycle = new Cycle {
                             RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-11-01"),
+                            StartDate = DateTime.Parse("2023-10-02")
+                        },
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
                             },
-                        new Cycle{
-                            RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-12-01")
-                        }
-                    }},
-                })
-            .WithInput("cycle", new Cycle {
-                RecordedDate = DateTime.Today,
-                StartDate = DateTime.Parse("2023-10-02")
-            })
-            .WithExpected("cycles", new []{
-                        new Cycle{
-                            RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-11-01"),
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }
+                        }},
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-11-01"),
                             },
-                        new Cycle{
+                            new (){
+                                RecordedDate = DateTime.Today,
+                                StartDate = DateTime.Parse("2023-12-01"),
+                            }
+                        },
+                        DeleteResult = false
+                    }))};
+
+            yield return new object[]{
+                new TestCase<TestParameters>("Cycles are empty",
+                new TestParameters(
+                    new Inputs{
+                        Cycle = new Cycle {
                             RecordedDate = DateTime.Today,
-                            StartDate = DateTime.Parse("2023-12-01")
-                        }
-            })
-            .WithExpected("delete result", false),
+                            StartDate = DateTime.Parse("2023-10-02")
+                        },
+                        Cycles = new List<Cycle>()
+                    },
+                    new ExpectedResults{
+                        Cycles = new List<Cycle>(),
+                        DeleteResult = false
+                    }))};
 
-            new TestCase("Cycles are empty")
-            .WithInput("cycle", new Cycle {
-                RecordedDate = DateTime.Today,
-                StartDate = DateTime.Parse("2023-10-02")
-            })
-            .WithExpected("cycles", new Cycle[]{})
-            .WithExpected("delete result", false)
+        }
 
-        }.Select(tc => new object[]{tc});
+        public IEnumerator<object[]> GetEnumerator() => TestCases().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public class ExpectedResults
+        {
+            public List<Cycle> Cycles { get; set; } = new();
+            public bool DeleteResult { get; set; }
+        }
+
+        public class Inputs: ISeedDataProvider
+        {
+            public Cycle Cycle { get; set; } = new();
+            public List<Cycle> Cycles { get; set; } = new();
+
+            public SeedData GetSeedData() => new SeedData{
+                Cycles = Cycles
+            };
+        }
+    }
 }

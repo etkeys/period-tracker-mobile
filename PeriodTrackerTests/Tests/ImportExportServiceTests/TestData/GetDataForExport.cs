@@ -114,7 +114,7 @@ public partial class ImportExportServiceTests
             public required string Payload {get; init;}
         }
 
-        public class Inputs
+        public class Inputs: ISeedDataProvider
         {
             public required Version AppVersion {get; init;}
             public required List<Cycle> Cycles {get; init;}

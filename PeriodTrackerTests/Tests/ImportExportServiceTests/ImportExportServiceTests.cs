@@ -18,7 +18,7 @@ public partial class ImportExportServiceTests: BaseTest, IClassFixture<Temporary
     {
         var testTempDir = _tempDir.CreateTestCaseDirectory(t.Name);
 
-        await SetupDatabase(testTempDir, t.Parameters.Inputs.GetSeedData());
+        await SetupDatabase(testTempDir, t.Parameters.Inputs);
 
         var actor = new ImportExportService();
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
@@ -33,7 +33,7 @@ public partial class ImportExportServiceTests: BaseTest, IClassFixture<Temporary
     {
         var testTempDir = _tempDir.CreateTestCaseDirectory(t.Name);
 
-        await SetupDatabase(testTempDir, t.Parameters.Inputs.GetSeedData());
+        await SetupDatabase(testTempDir, t.Parameters.Inputs);
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 

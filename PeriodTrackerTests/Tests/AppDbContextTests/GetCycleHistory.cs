@@ -10,14 +10,26 @@ public partial class AppDbContextTests
     {
         var testTempDir = _tempDir.CreateTestCaseDirectory(t.Name);
 
-        await SetupDatabase(testTempDir, t.Parameters.Inputs.GetSeedData());
+        await SetupDatabase(testTempDir, t.Parameters.Inputs);
 
         using var db = new AppDbContext(CreateDbContextOptions(testTempDir), true);
 
         var act = await db.GetCycleHistory();
-        var exp = t.Parameters.Expected.Cycles;
+        var exp = t.Parameters.Expected.Cycles.OrderByDescending(c => c.StartDate).ToList();
 
-        AssertCyclesHistory(exp, act);
+        Assert.Equal(exp.Count, act.Count);
+
+        var zipExpAct = exp.Zip(act);
+        Assert.All(
+            zipExpAct,
+            expAct =>
+            {
+                var (exp, act) = expAct;
+                Assert.Equal(exp.StartDate, act.StartDate);
+                Assert.Equal(exp.RecordedDate, act.RecordedDate);
+                Assert.Equal(exp.CycleLengthDays, act.CycleLengthDays);
+            }
+        );
     }
 
     public class GetCycleHistoryTestData : IEnumerable<object[]>
@@ -123,7 +135,7 @@ public partial class AppDbContextTests
             public List<CycleHistory> Cycles { get; set; } = [];
         }
 
-        public class Inputs
+        public class Inputs: ISeedDataProvider
         {
             public List<Cycle> Cycles { get; set; } = [];
 
